@@ -1,90 +1,77 @@
-import { complaints as mockComplaints, employees, users } from "../data/mockData";
-import { STATUS } from "../utils/constants";
+import axiosInstance from "./axiosInstance";
+import { adminApi } from "./adminApi";
 
-let complaints = [...mockComplaints];
-let localEmployees = [...employees];
-const delay = (ms = 600) => new Promise((r) => setTimeout(r, ms));
+/**
+ * Refresh the Clerk session token before each API call.
+ * Clerk JWTs are short-lived (~60s), so we must get a fresh one
+ * right before every request. This updates window.__sccmsToken
+ * which the axiosInstance interceptor reads.
+ *
+ * For the hardcoded admin token this is a no-op (it never expires).
+ */
+async function freshToken() {
+  // Admin token doesn't expire — skip refresh
+  if (window.__sccmsToken === "hardcoded-admin-token") return;
+
+  // Clerk exposes its auth via the global __clerk_frontend_api or the loaded instance
+  const clerk = window.Clerk;
+  if (clerk?.session) {
+    const newToken = await clerk.session.getToken();
+    if (newToken) window.__sccmsToken = newToken;
+  }
+}
 
 export const mockApi = {
-  async login({ email, password, role }) {
-    await delay();
-    const found = users.find((u) => u.email === email && u.password === password && u.role === role);
-    if (!found) throw new Error("Invalid credentials");
-    return { token: `mock-clerk-token-${found.id}`, user: found };
+  async login() {
+    throw new Error("Use Clerk login");
   },
-  async register(payload) {
-    await delay();
-    return { success: true, payload };
+  async register() {
+    throw new Error("Use Clerk register");
   },
   async refresh() {
-    await delay();
     return null;
   },
   async meComplaints(userId) {
-    await delay();
-    return complaints.filter((c) => c.citizenId === userId);
+    await freshToken();
+    const res = await axiosInstance.get(`/complaints?citizenId=${userId}`);
+    return res.data;
   },
   async allComplaints() {
-    await delay();
-    return complaints;
+    await freshToken();
+    const res = await axiosInstance.get("/complaints");
+    return res.data;
   },
   async complaintById(id) {
-    await delay();
-    return complaints.find((c) => c.id === id);
+    await freshToken();
+    const res = await axiosInstance.get(`/complaints/${id}`);
+    return res.data;
   },
   async createComplaint(payload) {
-    await delay();
-    const created = {
-      id: `CMP-${Math.floor(1020 + Math.random() * 100)}`,
-      status: STATUS.PENDING,
-      submittedAt: new Date().toISOString(),
-      history: [{ status: STATUS.PENDING, actor: payload.citizenName, note: "Complaint submitted", at: new Date().toISOString() }],
-      ...payload,
-    };
-    complaints = [created, ...complaints];
-    return created;
+    await freshToken();
+    const res = await axiosInstance.post("/complaints", payload);
+    return res.data;
   },
-  async assignComplaint(id, employeeId) {
-    await delay();
-    complaints = complaints.map((c) => (c.id === id ? { ...c, assignedTo: employeeId, status: STATUS.ASSIGNED } : c));
-    return complaints.find((c) => c.id === id);
+  async assignComplaint(id, employeeId, employeeName) {
+    await freshToken();
+    const res = await axiosInstance.patch(`/complaints/${id}/assign`, { employeeId, employeeName });
+    return res.data;
   },
   async updateComplaintStatus(id, nextStatus, note) {
-    await delay();
-    complaints = complaints.map((c) => {
-      if (c.id !== id) return c;
-      return {
-        ...c,
-        status: nextStatus,
-        resolutionNotes: nextStatus === STATUS.RESOLVED ? note : c.resolutionNotes,
-        history: [...c.history, { status: nextStatus, actor: "Employee", note: note || "Status updated", at: new Date().toISOString() }],
-      };
-    });
-    return complaints.find((c) => c.id === id);
+    await freshToken();
+    const res = await axiosInstance.patch(`/complaints/${id}/status`, { status: nextStatus, note });
+    return res.data;
   },
   async deleteComplaint(id) {
-    await delay();
-    complaints = complaints.filter((c) => c.id !== id);
-    return { success: true };
+    await freshToken();
+    const res = await axiosInstance.delete(`/complaints/${id}`);
+    return res.data;
   },
   async employees() {
-    await delay();
-    return localEmployees;
+    await freshToken();
+    const res = await axiosInstance.get("/admin/employees");
+    return res.data;
   },
   async createEmployee(payload) {
-    await delay();
-    const exists = localEmployees.some((employee) => employee.email.toLowerCase() === payload.email.toLowerCase());
-    if (exists) throw new Error("Employee with this email already exists");
-
-    const created = {
-      id: `e${localEmployees.length + 1}`,
-      name: payload.name,
-      email: payload.email,
-      department: payload.department,
-      assignedCount: 0,
-      joinedAt: new Date().toISOString(),
-    };
-    localEmployees = [created, ...localEmployees];
-    return created;
+    return adminApi.createEmployee(payload);
   },
 };

@@ -19,9 +19,9 @@ const AssignedComplaintsPage = () => {
 
   useEffect(() => {
     mockApi.allComplaints().then((all) =>
-      setRows(all.filter((r) => ["e1", "u-emp-1"].includes(r.assignedTo) || user.role === "employee")),
+      setRows(all.filter((r) => r.assignedTo === user.id)),
     );
-  }, [user.role]);
+  }, [user.id]);
 
   const filtered = useMemo(
     () => rows.filter((r) => (tab === "All" ? true : tab === "Resolved" ? r.status === "RESOLVED" : ["ASSIGNED", "IN_PROGRESS"].includes(r.status))),

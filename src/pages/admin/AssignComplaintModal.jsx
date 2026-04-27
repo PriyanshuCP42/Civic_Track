@@ -12,7 +12,9 @@ const AssignComplaintModal = ({ open, onClose, complaint, employees, onAssigned 
   const [strategy, setStrategy] = useState(strategies[0]);
 
   const submit = async () => {
-    const assigned = await mockApi.assignComplaint(complaint.id, employeeId || employees[0]?.id);
+    const selectedId = employeeId || employees[0]?.id;
+    const selectedEmp = employees.find((e) => e.id === selectedId);
+    const assigned = await mockApi.assignComplaint(complaint.id, selectedId, selectedEmp?.name || "Unknown");
     toast.success(`Assigned (${strategy})`);
     onAssigned(assigned);
     onClose();
