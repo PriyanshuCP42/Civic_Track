@@ -1,7 +1,7 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth as useClerkAuth, useClerk, useUser } from "@clerk/clerk-react";
-
-const AuthContext = createContext(null);
+import { AUTH_CONSTANTS } from "../data/authConstants";
+import { AuthContext } from "./authContextObject";
 
 const normalizeRole = (value) => {
   if (!value || typeof value !== "string") return null;
@@ -10,9 +10,8 @@ const normalizeRole = (value) => {
 };
 
 const deriveRole = (clerkUser) => {
-  const adminEmail = "admin@gmail.com";
   const email = clerkUser?.primaryEmailAddress?.emailAddress?.toLowerCase() || "";
-  if (email === adminEmail) return "admin";
+  if (email === AUTH_CONSTANTS.ADMIN_EMAIL) return "admin";
   return normalizeRole(clerkUser?.publicMetadata?.role) || "citizen";
 };
 
@@ -58,39 +57,44 @@ export const AuthProvider = ({ children }) => {
     return { ...baseUser, ...profilePatch };
   }, [manualUser, clerkUser, profilePatch]);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     setManualUser(null);
     setProfilePatch({});
     if (clerkUser) await clerk.signOut();
-  };
+  }, [clerk, clerkUser]);
 
-  const setUser = (nextUser) => {
+  const setUser = useCallback((nextUser) => {
     setProfilePatch((prev) => ({ ...prev, ...nextUser }));
-  };
+  }, []);
 
-  const completeRoleOnboarding = async ({ role, department }) => {
+  const completeRoleOnboarding = useCallback(async ({ role, department }) => {
     setProfilePatch((prev) => ({
       ...prev,
       role,
       department: role === "employee" ? department || "" : "",
     }));
-  };
+  }, []);
 
-  const loginWithHardcodedAdmin = ({ email, password }) => {
+  const loginWithHardcodedAdmin = useCallback(({ email, password }) => {
     const normalizedEmail = email?.trim().toLowerCase();
-    if (normalizedEmail !== "admin@gmail.com" || password !== "Ashmit") return false;
+    if (
+      normalizedEmail !== AUTH_CONSTANTS.ADMIN_EMAIL ||
+      password !== AUTH_CONSTANTS.ADMIN_PASSWORD
+    ) {
+      return false;
+    }
     setManualUser({
       id: "hardcoded-admin",
       clerkId: "hardcoded-admin",
       name: "Admin",
-      email: "admin@gmail.com",
+      email: AUTH_CONSTANTS.ADMIN_EMAIL,
       role: "admin",
       department: "",
       joinedAt: new Date().toISOString(),
     });
-    setToken("hardcoded-admin-token");
+    setToken(AUTH_CONSTANTS.HARDCODED_ADMIN_TOKEN);
     return true;
-  };
+  }, []);
 
   const value = useMemo(
     () => ({
@@ -104,14 +108,16 @@ export const AuthProvider = ({ children }) => {
       hasCompletedOnboarding: true,
       loginWithHardcodedAdmin,
     }),
-    [user, token, isLoaded],
+    [
+      completeRoleOnboarding,
+      isLoaded,
+      loginWithHardcodedAdmin,
+      logout,
+      setUser,
+      token,
+      user,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
-
-export const useAuth = () => {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
-  return ctx;
 };

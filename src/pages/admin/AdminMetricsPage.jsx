@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   Bar,
   BarChart,
@@ -16,7 +16,8 @@ import {
 import { differenceInDays } from "date-fns";
 import AppPageHeader from "../../components/layout/AppPageHeader";
 import { adminSurface, chartAxis, chartGrid, chartOrange, pageStack } from "../../lib/adminUi";
-import { mockApi } from "../../api/mockApi";
+import { useAllComplaints } from "../../hooks/useAllComplaints";
+import { STATUS } from "../../utils/constants";
 
 const tooltipProps = {
   contentStyle: {
@@ -30,12 +31,9 @@ const tooltipProps = {
 const PIE_COLORS = ["#ea580c", "#f97316", "#fb923c", "#fdba74", "#94a3b8", "#64748b"];
 
 const AdminMetricsPage = () => {
-  const [rows, setRows] = useState([]);
-  useEffect(() => {
-    mockApi.allComplaints().then(setRows);
-  }, []);
+  const { complaints: rows } = useAllComplaints();
 
-  const resolutionRate = rows.length ? Math.round((rows.filter((r) => r.status === "RESOLVED").length / rows.length) * 100) : 0;
+  const resolutionRate = rows.length ? Math.round((rows.filter((r) => r.status === STATUS.RESOLVED).length / rows.length) * 100) : 0;
 
   const statusData = useMemo(
     () => Object.entries(rows.reduce((a, r) => ({ ...a, [r.status]: (a[r.status] || 0) + 1 }), {})).map(([name, value]) => ({ name, value })),

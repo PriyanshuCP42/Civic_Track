@@ -1,8 +1,9 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import Modal from "../../components/ui/Modal";
 import { adminBtnPrimary, adminInput, adminLabel } from "../../lib/adminUi";
-import { mockApi } from "../../api/mockApi";
+import { useComplaintActions } from "../../hooks/useComplaintActions";
 
 const transitions = {
   ASSIGNED: ["IN_PROGRESS"],
@@ -10,12 +11,13 @@ const transitions = {
 };
 
 const UpdateStatusModal = ({ open, onClose, complaint, onUpdated }) => {
-  const { register, handleSubmit, watch } = useForm({ defaultValues: { status: "", note: "" } });
-  const status = watch("status");
+  const { register, handleSubmit } = useForm({ defaultValues: { status: "", note: "" } });
+  const [status, setStatus] = useState("");
+  const { updateComplaintStatus } = useComplaintActions();
 
   const submit = async (values) => {
     if (values.status === "RESOLVED" && !values.note) return toast.error("Resolution notes required");
-    const updated = await mockApi.updateComplaintStatus(complaint.id, values.status, values.note);
+    const updated = await updateComplaintStatus(complaint.id, values.status, values.note);
     onUpdated(updated);
     toast.success("Status updated");
     onClose();
@@ -26,7 +28,13 @@ const UpdateStatusModal = ({ open, onClose, complaint, onUpdated }) => {
       <form onSubmit={handleSubmit(submit)} className="space-y-5">
         <div>
           <label className={adminLabel}>Next status</label>
-          <select {...register("status", { required: true })} className={`mt-1.5 ${adminInput}`}>
+          <select
+            {...register("status", {
+              required: true,
+              onChange: (event) => setStatus(event.target.value),
+            })}
+            className={`mt-1.5 ${adminInput}`}
+          >
             <option value="">Select transition</option>
             {(transitions[complaint?.status?.toUpperCase()] || []).map((s) => (
               <option key={s} value={s}>

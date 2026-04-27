@@ -5,8 +5,8 @@ import toast from "react-hot-toast";
 import AppPageHeader from "../../components/layout/AppPageHeader";
 import MapPicker from "../../components/ui/MapPicker";
 import { categories } from "../../utils/constants";
-import { mockApi } from "../../api/mockApi";
-import { useAuth } from "../../context/AuthContext";
+import { useComplaintActions } from "../../hooks/useComplaintActions";
+import { useAuth } from "../../context/useAuth";
 import { adminBtnPrimary, adminBtnSecondary, adminInput, adminLabel, adminSurface, adminSurfaceMuted, pageStack } from "../../lib/adminUi";
 import { cn } from "@/lib/utils";
 
@@ -14,12 +14,18 @@ const steps = ["Details", "Location", "Review"];
 
 const NewComplaintPage = () => {
   const { user } = useAuth();
-  const { register, handleSubmit, watch, trigger } = useForm();
+  const { createComplaint } = useComplaintActions();
+  const { register, handleSubmit, trigger } = useForm();
   const [step, setStep] = useState(1);
   const [coords, setCoords] = useState(null);
   const [imageUrl, setImageUrl] = useState("");
   const [created, setCreated] = useState(null);
-  const description = watch("description", "");
+  const [previewValues, setPreviewValues] = useState({
+    title: "",
+    category: "",
+    description: "",
+    address: "",
+  });
 
   const next = async () => {
     const valid = await trigger(step === 1 ? ["title", "category", "description"] : ["address"]);
@@ -36,7 +42,7 @@ const NewComplaintPage = () => {
       imageUrl,
       location: { type: "Point", coordinates: coords },
     };
-    const createdComplaint = await mockApi.createComplaint(payload);
+    const createdComplaint = await createComplaint(payload);
     setCreated(createdComplaint);
     toast.success("Complaint submitted");
   };
@@ -97,11 +103,32 @@ const NewComplaintPage = () => {
             <div className="space-y-5">
               <div>
                 <label className={adminLabel}>Title</label>
-                <input {...register("title", { required: true })} className={`mt-1.5 ${adminInput}`} placeholder="Short summary of the issue" />
+                <input
+                  {...register("title", {
+                    required: true,
+                    onChange: (event) =>
+                      setPreviewValues((previous) => ({
+                        ...previous,
+                        title: event.target.value,
+                      })),
+                  })}
+                  className={`mt-1.5 ${adminInput}`}
+                  placeholder="Short summary of the issue"
+                />
               </div>
               <div>
                 <label className={adminLabel}>Category</label>
-                <select {...register("category", { required: true })} className={`mt-1.5 ${adminInput}`}>
+                <select
+                  {...register("category", {
+                    required: true,
+                    onChange: (event) =>
+                      setPreviewValues((previous) => ({
+                        ...previous,
+                        category: event.target.value,
+                      })),
+                  })}
+                  className={`mt-1.5 ${adminInput}`}
+                >
                   <option value="">Select category</option>
                   {categories.map((c) => (
                     <option key={c}>
@@ -113,11 +140,19 @@ const NewComplaintPage = () => {
               <div>
                 <label className={adminLabel}>Description</label>
                 <textarea
-                  {...register("description", { required: true, maxLength: 1000 })}
+                  {...register("description", {
+                    required: true,
+                    maxLength: 1000,
+                    onChange: (event) =>
+                      setPreviewValues((previous) => ({
+                        ...previous,
+                        description: event.target.value,
+                      })),
+                  })}
                   className={`mt-1.5 min-h-32 ${adminInput}`}
                   placeholder="What happened? Include landmarks or safety notes if relevant."
                 />
-                <p className="mt-1 text-xs text-slate-500">{description.length}/1000</p>
+                <p className="mt-1 text-xs text-slate-500">{previewValues.description.length}/1000</p>
               </div>
               <div>
                 <label className={adminLabel}>Photo URL (optional)</label>
@@ -136,7 +171,17 @@ const NewComplaintPage = () => {
               <MapPicker value={coords} onChange={setCoords} />
               <div>
                 <label className={adminLabel}>Address (optional)</label>
-                <input {...register("address")} className={`mt-1.5 ${adminInput}`} placeholder="Street or area name" />
+                <input
+                  {...register("address", {
+                    onChange: (event) =>
+                      setPreviewValues((previous) => ({
+                        ...previous,
+                        address: event.target.value,
+                      })),
+                  })}
+                  className={`mt-1.5 ${adminInput}`}
+                  placeholder="Street or area name"
+                />
               </div>
               {coords ? (
                 <p className={`text-xs text-slate-600 ${adminSurfaceMuted} rounded-xl px-3 py-2`}>
@@ -149,16 +194,16 @@ const NewComplaintPage = () => {
           {step === 3 && (
             <div className={`space-y-3 rounded-xl p-5 text-sm leading-relaxed text-slate-700 ${adminSurfaceMuted}`}>
               <p>
-                <span className="font-semibold text-slate-900">Title:</span> {watch("title")}
+                <span className="font-semibold text-slate-900">Title:</span> {previewValues.title}
               </p>
               <p>
-                <span className="font-semibold text-slate-900">Category:</span> {watch("category")}
+                <span className="font-semibold text-slate-900">Category:</span> {previewValues.category}
               </p>
               <p>
-                <span className="font-semibold text-slate-900">Description:</span> {watch("description")}
+                <span className="font-semibold text-slate-900">Description:</span> {previewValues.description}
               </p>
               <p>
-                <span className="font-semibold text-slate-900">Address:</span> {watch("address") || "—"}
+                <span className="font-semibold text-slate-900">Address:</span> {previewValues.address || "—"}
               </p>
             </div>
           )}

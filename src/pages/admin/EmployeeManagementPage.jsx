@@ -1,16 +1,15 @@
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { UserPlus } from "lucide-react";
 import toast from "react-hot-toast";
 import AppPageHeader from "../../components/layout/AppPageHeader";
 import Modal from "../../components/ui/Modal";
-import { mockApi } from "../../api/mockApi";
-import { adminApi } from "../../api/adminApi";
+import { useEmployees } from "../../hooks/useEmployees";
 import { departments } from "../../utils/constants";
 import { adminBtnAccent, adminBtnPrimary, adminInput, adminLabel, adminSurface, adminSurfaceMuted, pageStack } from "../../lib/adminUi";
 
 const EmployeeManagementPage = () => {
-  const [employees, setEmployees] = useState([]);
+  const { employees, createEmployee } = useEmployees();
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState({ q: "", dept: "" });
   const {
@@ -20,26 +19,29 @@ const EmployeeManagementPage = () => {
     formState: { errors, isSubmitting },
   } = useForm({ defaultValues: { name: "", email: "", password: "", department: "" } });
 
-  useEffect(() => {
-    mockApi.employees().then(setEmployees);
-  }, []);
-
-  const visible = employees.filter(
-    (e) =>
-      (!filter.dept || e.department === filter.dept) &&
-      `${e.name} ${e.email}`.toLowerCase().includes(filter.q.toLowerCase()),
+  const visible = useMemo(
+    () =>
+      employees.filter(
+        (employee) =>
+          (!filter.dept || employee.department === filter.dept) &&
+          `${employee.name} ${employee.email}`.toLowerCase().includes(filter.q.toLowerCase()),
+      ),
+    [employees, filter],
   );
 
   const addEmployee = async (values) => {
     try {
-      const created = await adminApi.createEmployee({
+      const result = await createEmployee({
         name: values.name,
         email: values.email,
         password: values.password,
         department: values.department,
       });
-      setEmployees((prev) => [created, ...prev]);
-      toast.success("Employee created");
+      if (result.source === "local") {
+        toast("Created locally only (API error). Check terminal for [admin/employees] logs.");
+      } else {
+        toast.success("Employee created");
+      }
       setOpen(false);
       reset();
     } catch (error) {
@@ -51,20 +53,7 @@ const EmployeeManagementPage = () => {
         toast.error(error.message);
         return;
       }
-      try {
-        const localCreated = await mockApi.createEmployee({
-          name: values.name,
-          email: values.email,
-          password: values.password,
-          department: values.department,
-        });
-        setEmployees((prev) => [localCreated, ...prev]);
-        toast("Created locally only (API error). Check terminal for [admin/employees] logs.");
-        setOpen(false);
-        reset();
-      } catch (localError) {
-        toast.error(localError?.message || error?.message || "Unable to create employee");
-      }
+      toast.error(error?.message || "Unable to create employee");
     }
   };
 

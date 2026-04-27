@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Download, Eye, Trash2, UserPlus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import AppPageHeader from "../../components/layout/AppPageHeader";
@@ -7,24 +7,20 @@ import SkeletonLoader from "../../components/ui/SkeletonLoader";
 import ConfirmDialog from "../../components/ui/ConfirmDialog";
 import AssignComplaintModal from "./AssignComplaintModal";
 import { adminBtnSecondary, adminIconBtn, adminInput, adminSurface, pageStack } from "../../lib/adminUi";
-import { mockApi } from "../../api/mockApi";
+import { useAllComplaints } from "../../hooks/useAllComplaints";
+import { useEmployees } from "../../hooks/useEmployees";
+import { useComplaintActions } from "../../hooks/useComplaintActions";
+import { STATUS } from "../../utils/constants";
 
 const AllComplaintsPage = () => {
-  const [rows, setRows] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { complaints: rows, isLoading: complaintsLoading, setComplaints: setRows } = useAllComplaints();
+  const { employees, isLoading: employeesLoading } = useEmployees();
+  const { deleteComplaint } = useComplaintActions();
   const [filter, setFilter] = useState({ status: "", q: "" });
   const [assigning, setAssigning] = useState(null);
   const [deleting, setDeleting] = useState(null);
-  const [employees, setEmployees] = useState([]);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    Promise.all([mockApi.allComplaints(), mockApi.employees()]).then(([c, e]) => {
-      setRows(c);
-      setEmployees(e);
-      setLoading(false);
-    });
-  }, []);
+  const loading = complaintsLoading || employeesLoading;
 
   const filtered = useMemo(
     () =>
@@ -64,11 +60,11 @@ const AllComplaintsPage = () => {
             onChange={(e) => setFilter({ ...filter, status: e.target.value })}
           >
             <option value="">All statuses</option>
-            <option>PENDING</option>
-            <option>ASSIGNED</option>
-            <option>IN_PROGRESS</option>
-            <option>RESOLVED</option>
-            <option>CLOSED</option>
+            <option>{STATUS.PENDING}</option>
+            <option>{STATUS.ASSIGNED}</option>
+            <option>{STATUS.IN_PROGRESS}</option>
+            <option>{STATUS.RESOLVED}</option>
+            <option>{STATUS.CLOSED}</option>
           </select>
         </div>
 
@@ -138,7 +134,7 @@ const AllComplaintsPage = () => {
         message="This permanently removes the complaint from the demo dataset."
         onClose={() => setDeleting(null)}
         onConfirm={async () => {
-          await mockApi.deleteComplaint(deleting.id);
+          await deleteComplaint(deleting.id);
           setRows((p) => p.filter((row) => row.id !== deleting.id));
           setDeleting(null);
         }}

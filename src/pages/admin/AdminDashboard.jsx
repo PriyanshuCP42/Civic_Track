@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import AppPageHeader from "../../components/layout/AppPageHeader";
 import { adminSurface, chartAxis, chartGrid, chartOrange, chartOrangeSoft, pageStack } from "../../lib/adminUi";
-import { mockApi } from "../../api/mockApi";
+import { useAllComplaints } from "../../hooks/useAllComplaints";
+import { STATUS } from "../../utils/constants";
 
 const tooltipProps = {
   contentStyle: {
@@ -23,10 +24,7 @@ const StatCard = ({ label, value, hint }) => (
 );
 
 const AdminDashboard = () => {
-  const [rows, setRows] = useState([]);
-  useEffect(() => {
-    mockApi.allComplaints().then(setRows);
-  }, []);
+  const { complaints: rows } = useAllComplaints();
 
   const byCategory = useMemo(
     () =>
@@ -48,10 +46,10 @@ const AdminDashboard = () => {
 
   const stats = useMemo(() => {
     const total = rows.length;
-    const pending = rows.filter((r) => r.status === "PENDING").length;
-    const assigned = rows.filter((r) => r.status === "ASSIGNED").length;
-    const inProgress = rows.filter((r) => r.status === "IN_PROGRESS").length;
-    const resolved = rows.filter((r) => r.status === "RESOLVED").length;
+    const pending = rows.filter((r) => r.status === STATUS.PENDING).length;
+    const assigned = rows.filter((r) => r.status === STATUS.ASSIGNED).length;
+    const inProgress = rows.filter((r) => r.status === STATUS.IN_PROGRESS).length;
+    const resolved = rows.filter((r) => r.status === STATUS.RESOLVED).length;
     return { total, pending, assigned, inProgress, resolved };
   }, [rows]);
 
