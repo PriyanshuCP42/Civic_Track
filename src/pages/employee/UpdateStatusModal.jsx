@@ -28,8 +28,8 @@ const UpdateStatusModal = ({ open, onClose, complaint, onUpdated }) => {
           <label className={adminLabel}>Next status</label>
           <select {...register("status", { required: true })} className={`mt-1.5 ${adminInput}`}>
             <option value="">Select transition</option>
-            {(transitions[complaint?.status] || []).map((s) => (
-              <option key={s}>
+            {(transitions[complaint?.status?.toUpperCase()] || []).map((s) => (
+              <option key={s} value={s}>
                 {s.replace(/_/g, " ")}
               </option>
             ))}
