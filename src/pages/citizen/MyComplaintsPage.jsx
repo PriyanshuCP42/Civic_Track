@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { ArrowRight, Plus } from "lucide-react";
@@ -6,27 +6,19 @@ import AppPageHeader from "../../components/layout/AppPageHeader";
 import StatusBadge from "../../components/ui/StatusBadge";
 import SkeletonLoader from "../../components/ui/SkeletonLoader";
 import EmptyState from "../../components/ui/EmptyState";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 import { adminBtnAccent, adminIconBtn, adminInput, adminSurface, pageStack } from "../../lib/adminUi";
-import { mockApi } from "../../api/mockApi";
+import { useCitizenComplaints } from "../../hooks/useCitizenComplaints";
 
 const MyComplaintsPage = () => {
   const { user } = useAuth();
-  const [rows, setRows] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { complaints, isLoading: loading } = useCitizenComplaints(user?.id);
   const [q, setQ] = useState("");
   const navigate = useNavigate();
 
-  useEffect(() => {
-    mockApi.meComplaints(user.id).then((d) => {
-      setRows(d);
-      setLoading(false);
-    });
-  }, [user.id]);
-
   const filtered = useMemo(
-    () => rows.filter((r) => `${r.id} ${r.title}`.toLowerCase().includes(q.toLowerCase())),
-    [rows, q],
+    () => complaints.filter((r) => `${r.id} ${r.title}`.toLowerCase().includes(q.toLowerCase())),
+    [complaints, q],
   );
 
   return (

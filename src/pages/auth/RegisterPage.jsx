@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { useSignUp } from "@clerk/clerk-react";
 import { ArrowRight, Eye, EyeOff, Globe, Lock, Mail, MapPinned, User } from "lucide-react";
 import toast from "react-hot-toast";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 import { cn } from "@/lib/utils";
 import AuthPageBackdrop from "./AuthPageBackdrop";
 
@@ -14,14 +14,13 @@ const RegisterPage = () => {
   const { user, loading } = useAuth();
   const {
     register,
-    watch,
     handleSubmit,
     formState: { errors },
   } = useForm();
   const { isLoaded, signUp, setActive } = useSignUp();
-  const password = watch("password", "");
   const navigate = useNavigate();
-  const strength = Math.min(100, password.length * 12.5);
+  const [passwordValue, setPasswordValue] = useState("");
+  const strength = Math.min(100, passwordValue.length * 12.5);
   const [showPw, setShowPw] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [accountKind, setAccountKind] = useState("citizen");
@@ -200,7 +199,11 @@ const RegisterPage = () => {
                     <Lock className="pointer-events-none absolute left-3.5 h-4 w-4 text-slate-400" aria-hidden />
                     <input
                       type={showPw ? "text" : "password"}
-                      {...register("password", { required: true, minLength: { value: 8, message: "At least 8 characters" } })}
+                      {...register("password", {
+                        required: true,
+                        minLength: { value: 8, message: "At least 8 characters" },
+                        onChange: (event) => setPasswordValue(event.target.value),
+                      })}
                       autoComplete="new-password"
                       className="w-full rounded-xl border-0 bg-transparent py-3 pl-11 pr-11 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-0"
                       placeholder="••••••••"

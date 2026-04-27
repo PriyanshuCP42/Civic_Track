@@ -2,6 +2,8 @@ import { Router } from "express";
 import Complaint from "../models/Complaint.js";
 import { verifyToken, authorize } from "../middleware/auth.js";
 import { getIO } from "../utils/socket.js";
+import { SERVER_CONSTANTS } from "../config/constants.js";
+import { generateComplaintId } from "../utils/complaintId.js";
 
 const router = Router();
 
@@ -33,11 +35,11 @@ router.get("/:id", verifyToken, async (req, res, next) => {
 });
 
 // POST /api/v1/complaints
-router.post("/", verifyToken, authorize("citizen"), async (req, res, next) => {
+router.post("/", verifyToken, authorize(SERVER_CONSTANTS.ROLES.CITIZEN), async (req, res, next) => {
   try {
     const { title, citizenId, citizenName, category, description, address, location, imageUrl, images } = req.body;
 
-    const id = "CMP-" + Math.floor(1000 + Math.random() * 9000);
+    const id = generateComplaintId();
     const now = new Date();
 
     const complaint = await Complaint.create({
@@ -51,10 +53,15 @@ router.post("/", verifyToken, authorize("citizen"), async (req, res, next) => {
       location: location || { type: "Point", coordinates: [0, 0] },
       imageUrl: imageUrl || "",
       images: images || [],
-      status: "PENDING",
+      status: SERVER_CONSTANTS.COMPLAINT_STATUS.PENDING,
       submittedAt: now,
       history: [
-        { status: "PENDING", actor: citizenName, note: "Complaint submitted", at: now },
+        {
+          status: SERVER_CONSTANTS.COMPLAINT_STATUS.PENDING,
+          actor: citizenName,
+          note: "Complaint submitted",
+          at: now,
+        },
       ],
     });
 
@@ -65,7 +72,7 @@ router.post("/", verifyToken, authorize("citizen"), async (req, res, next) => {
 });
 
 // PATCH /api/v1/complaints/:id/assign
-router.patch("/:id/assign", verifyToken, authorize("admin"), async (req, res, next) => {
+router.patch("/:id/assign", verifyToken, authorize(SERVER_CONSTANTS.ROLES.ADMIN), async (req, res, next) => {
   try {
     const { employeeId, employeeName } = req.body;
     const complaint = await Complaint.findOne({ id: req.params.id });
@@ -74,9 +81,9 @@ router.patch("/:id/assign", verifyToken, authorize("admin"), async (req, res, ne
     }
 
     complaint.assignedTo = employeeId;
-    complaint.status = "ASSIGNED";
+    complaint.status = SERVER_CONSTANTS.COMPLAINT_STATUS.ASSIGNED;
     complaint.history.push({
-      status: "ASSIGNED",
+      status: SERVER_CONSTANTS.COMPLAINT_STATUS.ASSIGNED,
       actor: "Admin",
       note: "Complaint assigned to " + employeeName,
       at: new Date(),
@@ -84,7 +91,9 @@ router.patch("/:id/assign", verifyToken, authorize("admin"), async (req, res, ne
 
     await complaint.save();
 
-    getIO().to("complaint_" + complaint.id).emit("status_updated", {
+    getIO()
+      .to(`${SERVER_CONSTANTS.SOCKET.COMPLAINT_ROOM_PREFIX}${complaint.id}`)
+      .emit(SERVER_CONSTANTS.SOCKET.STATUS_UPDATED_EVENT, {
       id: complaint.id,
       status: complaint.status,
       history: complaint.history,
@@ -97,11 +106,16 @@ router.patch("/:id/assign", verifyToken, authorize("admin"), async (req, res, ne
 });
 
 // PATCH /api/v1/complaints/:id/status
-router.patch("/:id/status", verifyToken, authorize("employee"), async (req, res, next) => {
+router.patch("/:id/status", verifyToken, authorize(SERVER_CONSTANTS.ROLES.EMPLOYEE), async (req, res, next) => {
   try {
     const { status, note } = req.body;
 
-    if (!["IN_PROGRESS", "RESOLVED"].includes(status)) {
+    if (
+      ![
+        SERVER_CONSTANTS.COMPLAINT_STATUS.IN_PROGRESS,
+        SERVER_CONSTANTS.COMPLAINT_STATUS.RESOLVED,
+      ].includes(status)
+    ) {
       return res.status(400).json({ message: "Invalid status" });
     }
 
@@ -111,7 +125,7 @@ router.patch("/:id/status", verifyToken, authorize("employee"), async (req, res,
     }
 
     complaint.status = status;
-    if (status === "RESOLVED") {
+    if (status === SERVER_CONSTANTS.COMPLAINT_STATUS.RESOLVED) {
       complaint.resolutionNotes = note;
     }
     complaint.history.push({
@@ -123,7 +137,9 @@ router.patch("/:id/status", verifyToken, authorize("employee"), async (req, res,
 
     await complaint.save();
 
-    getIO().to("complaint_" + complaint.id).emit("status_updated", {
+    getIO()
+      .to(`${SERVER_CONSTANTS.SOCKET.COMPLAINT_ROOM_PREFIX}${complaint.id}`)
+      .emit(SERVER_CONSTANTS.SOCKET.STATUS_UPDATED_EVENT, {
       id: complaint.id,
       status: complaint.status,
       history: complaint.history,
@@ -136,7 +152,7 @@ router.patch("/:id/status", verifyToken, authorize("employee"), async (req, res,
 });
 
 // DELETE /api/v1/complaints/:id
-router.delete("/:id", verifyToken, authorize("admin"), async (req, res, next) => {
+router.delete("/:id", verifyToken, authorize(SERVER_CONSTANTS.ROLES.ADMIN), async (req, res, next) => {
   try {
     await Complaint.deleteOne({ id: req.params.id });
     return res.json({ success: true });

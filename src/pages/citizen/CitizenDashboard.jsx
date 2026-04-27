@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { Plus } from "lucide-react";
@@ -6,9 +6,10 @@ import AppPageHeader from "../../components/layout/AppPageHeader";
 import ComplaintCard from "../../components/ui/ComplaintCard";
 import EmptyState from "../../components/ui/EmptyState";
 import SkeletonLoader from "../../components/ui/SkeletonLoader";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 import { adminBtnAccent, adminSurface, pageStack } from "../../lib/adminUi";
-import { mockApi } from "../../api/mockApi";
+import { useCitizenComplaints } from "../../hooks/useCitizenComplaints";
+import { STATUS } from "../../utils/constants";
 
 const StatCard = ({ label, value }) => (
   <div className={`${adminSurface} p-6 transition hover:border-slate-300/80 hover:shadow-md md:p-7`}>
@@ -19,23 +20,17 @@ const StatCard = ({ label, value }) => (
 
 const CitizenDashboard = () => {
   const { user } = useAuth();
-  const [loading, setLoading] = useState(true);
-  const [items, setItems] = useState([]);
+  const { complaints: items, isLoading: loading } = useCitizenComplaints(user?.id);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    mockApi.meComplaints(user.id).then((d) => {
-      setItems(d);
-      setLoading(false);
-    });
-  }, [user.id]);
-
-  const counts = {
-    Total: items.length,
-    Pending: items.filter((i) => i.status === "PENDING").length,
-    "In progress": items.filter((i) => i.status === "IN_PROGRESS").length,
-    Resolved: items.filter((i) => i.status === "RESOLVED").length,
-  };
+  const counts = useMemo(
+    () => ({
+      Total: items.length,
+      Pending: items.filter((item) => item.status === STATUS.PENDING).length,
+      "In progress": items.filter((item) => item.status === STATUS.IN_PROGRESS).length,
+      Resolved: items.filter((item) => item.status === STATUS.RESOLVED).length,
+    }),
+    [items],
+  );
 
   return (
     <div className={pageStack}>

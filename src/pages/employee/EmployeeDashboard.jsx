@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import AppPageHeader from "../../components/layout/AppPageHeader";
 import StatusBadge from "../../components/ui/StatusBadge";
 import { adminSurface, pageStack } from "../../lib/adminUi";
-import { mockApi } from "../../api/mockApi";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
+import { useEmployeeComplaints } from "../../hooks/useEmployeeComplaints";
+import { STATUS } from "../../utils/constants";
 const StatCard = ({ label, value }) => (
   <div className={`${adminSurface} p-6 transition hover:border-slate-300/80 hover:shadow-md md:p-7`}>
     <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">{label}</p>
@@ -14,21 +15,27 @@ const StatCard = ({ label, value }) => (
 
 const EmployeeDashboard = () => {
   const { user } = useAuth();
-  const [rows, setRows] = useState([]);
+  const { complaints: rows } = useEmployeeComplaints(user?.id);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    mockApi.allComplaints().then((all) =>
-      setRows(all.filter((r) => r.assignedTo === user.id)),
-    );
-  }, [user.id]);
-
-  const active = useMemo(() => rows.filter((r) => ["ASSIGNED", "IN_PROGRESS"].includes(r.status)), [rows]);
+  const active = useMemo(
+    () =>
+      rows.filter((row) =>
+        [STATUS.ASSIGNED, STATUS.IN_PROGRESS].includes(row.status),
+      ),
+    [rows],
+  );
 
   const stats = [
     { label: "In your queue", value: rows.length },
-    { label: "In progress", value: rows.filter((r) => r.status === "IN_PROGRESS").length },
-    { label: "Resolved", value: rows.filter((r) => r.status === "RESOLVED").length },
+    {
+      label: "In progress",
+      value: rows.filter((row) => row.status === STATUS.IN_PROGRESS).length,
+    },
+    {
+      label: "Resolved",
+      value: rows.filter((row) => row.status === STATUS.RESOLVED).length,
+    },
     { label: "Avg. resolution (demo)", value: "3.2d" },
   ];
 

@@ -2,7 +2,7 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import Modal from "../../components/ui/Modal";
 import { adminBtnPrimary, adminSurfaceMuted } from "../../lib/adminUi";
-import { mockApi } from "../../api/mockApi";
+import { useComplaintActions } from "../../hooks/useComplaintActions";
 import { cn } from "@/lib/utils";
 
 const strategies = ["Assign manually", "Auto-assign by department", "Auto-assign by proximity"];
@@ -10,11 +10,12 @@ const strategies = ["Assign manually", "Auto-assign by department", "Auto-assign
 const AssignComplaintModal = ({ open, onClose, complaint, employees, onAssigned }) => {
   const [employeeId, setEmployeeId] = useState("");
   const [strategy, setStrategy] = useState(strategies[0]);
+  const { assignComplaint } = useComplaintActions();
 
   const submit = async () => {
     const selectedId = employeeId || employees[0]?.id;
     const selectedEmp = employees.find((e) => e.id === selectedId);
-    const assigned = await mockApi.assignComplaint(complaint.id, selectedId, selectedEmp?.name || "Unknown");
+    const assigned = await assignComplaint(complaint.id, selectedId, selectedEmp?.name || "Unknown");
     toast.success(`Assigned (${strategy})`);
     onAssigned(assigned);
     onClose();

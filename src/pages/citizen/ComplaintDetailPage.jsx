@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { format } from "date-fns";
 import { ArrowLeft } from "lucide-react";
@@ -6,13 +6,12 @@ import AppPageHeader from "../../components/layout/AppPageHeader";
 import StatusBadge from "../../components/ui/StatusBadge";
 import MapPicker from "../../components/ui/MapPicker";
 import { adminSurface, pageStack } from "../../lib/adminUi";
-import { mockApi } from "../../api/mockApi";
-import socket from "../../utils/socket";
+import { useComplaintDetails } from "../../hooks/useComplaintDetails";
 
 const ComplaintDetailPage = () => {
   const { id } = useParams();
   const { pathname } = useLocation();
-  const [item, setItem] = useState(null);
+  const { complaint: item } = useComplaintDetails(id);
 
   const { backHref, backLabel, eyebrow } = useMemo(() => {
     if (pathname.startsWith("/admin")) {
@@ -23,31 +22,6 @@ const ComplaintDetailPage = () => {
     }
     return { backHref: "/citizen/complaints", backLabel: "My complaints", eyebrow: "Citizen" };
   }, [pathname]);
-
-  useEffect(() => {
-    mockApi.complaintById(id).then(setItem);
-  }, [id]);
-
-  // Socket.io real-time updates
-  useEffect(() => {
-    socket.connect();
-    socket.emit("join_complaint", id);
-
-    const handleStatusUpdated = (data) => {
-      if (data.id === id) {
-        setItem((prev) =>
-          prev ? { ...prev, status: data.status, history: data.history } : prev
-        );
-      }
-    };
-
-    socket.on("status_updated", handleStatusUpdated);
-
-    return () => {
-      socket.off("status_updated", handleStatusUpdated);
-      socket.disconnect();
-    };
-  }, [id]);
 
   if (!item) return null;
 

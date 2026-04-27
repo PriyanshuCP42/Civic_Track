@@ -4,11 +4,19 @@ import { useForm } from "react-hook-form";
 import { ArrowRight, Globe, Eye, EyeOff, MapPinned } from "lucide-react";
 import { useSignIn } from "@clerk/clerk-react";
 import toast from "react-hot-toast";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 import AuthPageBackdrop from "./AuthPageBackdrop";
 
 const HERO_HEADLINE_PREFIX = "Complaints management for ";
 const HERO_HEADLINE_FULL = `${HERO_HEADLINE_PREFIX}modern cities`;
+const HERO_ANIMATION_DURATION_MS = 2800;
+
+/**
+ * Determine whether reduced motion is preferred by current browser settings.
+ * @returns {boolean}
+ */
+const prefersReducedMotion = () =>
+  Boolean(window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches);
 
 const LoginPage = () => {
   const { register, handleSubmit, setValue } = useForm({ defaultValues: { email: "", password: "", verifyCode: "" } });
@@ -17,22 +25,19 @@ const LoginPage = () => {
   const { isLoaded, signIn, setActive } = useSignIn();
   const { user, loginWithHardcodedAdmin } = useAuth();
   const navigate = useNavigate();
-  const [heroTypedLen, setHeroTypedLen] = useState(0);
+  const [heroTypedLen, setHeroTypedLen] = useState(() =>
+    prefersReducedMotion() ? HERO_HEADLINE_FULL.length : 0,
+  );
 
   useEffect(() => {
     const fullLen = HERO_HEADLINE_FULL.length;
-    const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
-    if (reduceMotion) {
-      setHeroTypedLen(fullLen);
-      return;
-    }
+    if (prefersReducedMotion()) return undefined;
 
-    const durationMs = 2800;
     const start = performance.now();
     let raf = 0;
 
     const tick = (now) => {
-      const t = Math.min(1, (now - start) / durationMs);
+      const t = Math.min(1, (now - start) / HERO_ANIMATION_DURATION_MS);
       const eased = t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
       const next = t >= 1 ? fullLen : Math.min(fullLen, Math.floor(eased * fullLen));
       setHeroTypedLen(next);

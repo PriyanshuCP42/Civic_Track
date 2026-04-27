@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { differenceInDays } from "date-fns";
 import { Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -6,25 +6,27 @@ import AppPageHeader from "../../components/layout/AppPageHeader";
 import StatusBadge from "../../components/ui/StatusBadge";
 import UpdateStatusModal from "./UpdateStatusModal";
 import { adminBtnSecondary, adminSurface, pageStack } from "../../lib/adminUi";
-import { mockApi } from "../../api/mockApi";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
+import { useEmployeeComplaints } from "../../hooks/useEmployeeComplaints";
+import { STATUS } from "../../utils/constants";
 import { cn } from "@/lib/utils";
 
 const AssignedComplaintsPage = () => {
-  const [rows, setRows] = useState([]);
   const [tab, setTab] = useState("Active");
   const [current, setCurrent] = useState(null);
   const { user } = useAuth();
+  const { complaints: rows, setComplaints: setRows } = useEmployeeComplaints(user?.id);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    mockApi.allComplaints().then((all) =>
-      setRows(all.filter((r) => r.assignedTo === user.id)),
-    );
-  }, [user.id]);
-
   const filtered = useMemo(
-    () => rows.filter((r) => (tab === "All" ? true : tab === "Resolved" ? r.status === "RESOLVED" : ["ASSIGNED", "IN_PROGRESS"].includes(r.status))),
+    () =>
+      rows.filter((row) =>
+        tab === "All"
+          ? true
+          : tab === "Resolved"
+            ? row.status === STATUS.RESOLVED
+            : [STATUS.ASSIGNED, STATUS.IN_PROGRESS].includes(row.status),
+      ),
     [rows, tab],
   );
 

@@ -1,7 +1,8 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 import { departments } from "../../utils/constants";
 
 const RoleOnboardingPage = () => {
@@ -9,12 +10,10 @@ const RoleOnboardingPage = () => {
   const navigate = useNavigate();
   const {
     register,
-    watch,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm({ defaultValues: { role: "citizen", department: "" } });
-
-  const role = watch("role");
+  const [role, setRole] = useState("citizen");
 
   const onSubmit = async (values) => {
     await completeRoleOnboarding(values);
@@ -38,7 +37,15 @@ const RoleOnboardingPage = () => {
               key={item.id}
               className={`cursor-pointer rounded-lg border p-3 text-center text-sm ${role === item.id ? "border-blue-600 bg-blue-50 text-blue-700" : "border-slate-200 text-slate-700"}`}
             >
-              <input type="radio" value={item.id} {...register("role", { required: true })} className="sr-only" />
+              <input
+                type="radio"
+                value={item.id}
+                {...register("role", {
+                  required: true,
+                  onChange: (event) => setRole(event.target.value),
+                })}
+                className="sr-only"
+              />
               {item.label}
             </label>
           ))}

@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { useLocation } from "react-router-dom";
 import AppPageHeader from "../../components/layout/AppPageHeader";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 import { adminBtnPrimary, adminInput, adminLabel, adminSurface, pageStack } from "../../lib/adminUi";
 
 const eyebrowForPath = (pathname) => {

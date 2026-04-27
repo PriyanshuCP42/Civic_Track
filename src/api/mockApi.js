@@ -1,5 +1,6 @@
 import axiosInstance from "./axiosInstance";
 import { adminApi } from "./adminApi";
+import { AUTH_CONSTANTS } from "../data/authConstants";
 
 /**
  * Refresh the Clerk session token before each API call.
@@ -11,7 +12,7 @@ import { adminApi } from "./adminApi";
  */
 async function freshToken() {
   // Admin token doesn't expire — skip refresh
-  if (window.__sccmsToken === "hardcoded-admin-token") return;
+  if (window.__sccmsToken === AUTH_CONSTANTS.HARDCODED_ADMIN_TOKEN) return;
 
   // Clerk exposes its auth via the global __clerk_frontend_api or the loaded instance
   const clerk = window.Clerk;
