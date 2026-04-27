@@ -7,16 +7,13 @@ import toast from "react-hot-toast";
 import { useAuth } from "../../context/AuthContext";
 import AuthPageBackdrop from "./AuthPageBackdrop";
 
-const ADMIN_EMAIL = "admin@gmail.com";
-const ADMIN_PASSWORD = "Ashmit";
-
 const HERO_HEADLINE_PREFIX = "Complaints management for ";
 const HERO_HEADLINE_FULL = `${HERO_HEADLINE_PREFIX}modern cities`;
 
 const LoginPage = () => {
-  const { register, handleSubmit, setValue } = useForm({ defaultValues: { email: "", password: "", mfaCode: "" } });
+  const { register, handleSubmit, setValue } = useForm({ defaultValues: { email: "", password: "", verifyCode: "" } });
   const [show, setShow] = useState(false);
-  const [mfaRequired, setMfaRequired] = useState(false);
+  const [needsCode, setNeedsCode] = useState(false);
   const { isLoaded, signIn, setActive } = useSignIn();
   const { user, loginWithHardcodedAdmin } = useAuth();
   const navigate = useNavigate();
@@ -36,7 +33,6 @@ const LoginPage = () => {
 
     const tick = (now) => {
       const t = Math.min(1, (now - start) / durationMs);
-      // Ease-in-out: gentle ramp at start/end, steady in the middle (no uneven space pauses)
       const eased = t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
       const next = t >= 1 ? fullLen : Math.min(fullLen, Math.floor(eased * fullLen));
       setHeroTypedLen(next);
@@ -54,34 +50,18 @@ const LoginPage = () => {
   const completeWithSession = async (step) => {
     const sessionId = step.createdSessionId || signIn.createdSessionId;
     if (step.status !== "complete" || !sessionId) {
-      toast.error(
-        `Clerk needs another step (${step.status}). Dashboard: Attack protection (CAPTCHA/bot), email verification, and password strategy.`,
-      );
+      toast.error(`Sign-in incomplete (${step.status}). Please try again.`);
       return;
     }
     await setActive({ session: sessionId });
-    setMfaRequired(false);
+    setNeedsCode(false);
     toast.success("Welcome back");
     navigate("/", { replace: true });
-  };
-
-  const submitSecondFactor = async (code) => {
-    const factors = signIn.supportedSecondFactors ?? [];
-    const totp = factors.find((f) => f.strategy === "totp");
-    const backup = factors.find((f) => f.strategy === "backup_code");
-    if (totp) return signIn.attemptSecondFactor({ strategy: "totp", code });
-    if (backup) return signIn.attemptSecondFactor({ strategy: "backup_code", code });
-    const phone = factors.find((f) => f.strategy === "phone_code");
-    if (phone) {
-      throw new Error("This account uses SMS 2FA. Use Clerk hosted sign-in or disable phone 2FA for this user in Clerk.");
-    }
-    throw new Error("No TOTP or backup-code second factor found. Disable MFA in Clerk Dashboard for this user.");
   };
 
   const onSubmit = async (values) => {
     const adminLogin = loginWithHardcodedAdmin(values);
     if (adminLogin) {
-      setMfaRequired(false);
       toast.success("Welcome, Admin");
       navigate("/admin", { replace: true });
       return;
@@ -90,17 +70,33 @@ const LoginPage = () => {
     if (!isLoaded) return;
 
     try {
-      if (mfaRequired) {
-        const code = values.mfaCode?.replace(/\s/g, "") || "";
+      // --- Step 2: user is entering the email verification code ---
+      if (needsCode) {
+        const code = values.verifyCode?.replace(/\s/g, "") || "";
         if (!code) {
-          toast.error("Enter the code from your authenticator app (or a backup code).");
+          toast.error("Enter the verification code sent to your email.");
           return;
         }
-        const step = await submitSecondFactor(code);
+
+        // Try email_code first, fall back to other strategies
+        const factors = signIn.supportedSecondFactors ?? [];
+        const emailFactor = factors.find((f) => f.strategy === "email_code");
+        const totpFactor = factors.find((f) => f.strategy === "totp");
+
+        let step;
+        if (emailFactor) {
+          step = await signIn.attemptSecondFactor({ strategy: "email_code", code });
+        } else if (totpFactor) {
+          step = await signIn.attemptSecondFactor({ strategy: "totp", code });
+        } else {
+          // Try email_code anyway as a fallback
+          step = await signIn.attemptSecondFactor({ strategy: "email_code", code });
+        }
         await completeWithSession(step);
         return;
       }
 
+      // --- Step 1: normal email + password login ---
       const email = values.email.trim();
       const password = values.password;
 
@@ -110,18 +106,23 @@ const LoginPage = () => {
         const factors = step.supportedFirstFactors ?? signIn.supportedFirstFactors ?? [];
         const hasPassword = factors.some((f) => f.strategy === "password");
         if (!hasPassword) {
-          toast.error(
-            "Password sign-in is not available for this identifier (check Clerk user / verified email), or use Google.",
-          );
+          toast.error("Password sign-in is not available for this account. Try Google.");
           return;
         }
         step = await signIn.attemptFirstFactor({ strategy: "password", password });
       }
 
+      // Clerk requires a second step (email verification code)
       if (step.status === "needs_second_factor") {
-        setMfaRequired(true);
-        setValue("mfaCode", "");
-        toast("Two-step verification: enter your authenticator code.");
+        // Try to prepare the email code factor so Clerk sends the email
+        const factors = step.supportedSecondFactors ?? signIn.supportedSecondFactors ?? [];
+        const emailFactor = factors.find((f) => f.strategy === "email_code");
+        if (emailFactor) {
+          await signIn.prepareSecondFactor({ strategy: "email_code" });
+        }
+        setNeedsCode(true);
+        setValue("verifyCode", "");
+        toast("A verification code was sent to your email.");
         return;
       }
 
@@ -207,23 +208,11 @@ const LoginPage = () => {
             <div id="clerk-captcha" className="mb-1 min-h-[1px]" aria-hidden />
             <h2 className="text-2xl font-bold tracking-tight text-slate-900">Sign in</h2>
             <p className="mt-1 text-sm text-slate-500">Use your work email or Google to continue.</p>
-            <button
-              type="button"
-              onClick={() => {
-                setMfaRequired(false);
-                setValue("email", ADMIN_EMAIL);
-                setValue("password", ADMIN_PASSWORD);
-                setValue("mfaCode", "");
-              }}
-              className="mb-3 mt-6 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-100"
-            >
-              Use admin demo credentials
-            </button>
 
             <button
               type="button"
               onClick={signInWithGoogle}
-              className="mb-4 flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+              className="mb-4 mt-6 flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
             >
               <Globe className="h-4 w-4 text-slate-500" /> Continue with Google
             </button>
@@ -235,49 +224,52 @@ const LoginPage = () => {
             </div>
 
             <input
-              {...register("email", { required: !mfaRequired })}
-              readOnly={mfaRequired}
+              {...register("email", { required: !needsCode })}
+              readOnly={needsCode}
               placeholder="Email"
-              className="mb-3 w-full rounded-xl border border-slate-200/90 bg-slate-50/90 px-3 py-3 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-orange-300 focus:bg-white focus:ring-2 focus:ring-orange-500/15 read-only:bg-slate-100"
+              className={`mb-3 w-full rounded-xl border border-slate-200/90 bg-slate-50/90 px-3 py-3 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-orange-300 focus:bg-white focus:ring-2 focus:ring-orange-500/15 ${needsCode ? "bg-slate-100 opacity-60" : ""}`}
             />
             <div className="relative mb-3">
               <input
                 type={show ? "text" : "password"}
-                {...register("password", { required: !mfaRequired })}
-                readOnly={mfaRequired}
+                {...register("password", { required: !needsCode })}
+                readOnly={needsCode}
                 placeholder="Password"
-                className="w-full rounded-xl border border-slate-200/90 bg-slate-50/90 px-3 py-3 pr-10 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-orange-300 focus:bg-white focus:ring-2 focus:ring-orange-500/15 read-only:bg-slate-100"
+                className={`w-full rounded-xl border border-slate-200/90 bg-slate-50/90 px-3 py-3 pr-10 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-orange-300 focus:bg-white focus:ring-2 focus:ring-orange-500/15 ${needsCode ? "bg-slate-100 opacity-60" : ""}`}
               />
               <button type="button" className="absolute right-2.5 top-2.5 rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600" onClick={() => setShow((s) => !s)}>
                 {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
-            {mfaRequired ? (
+
+            {needsCode && (
               <>
-                <label className="mb-1 block text-xs font-medium text-slate-600">Authenticator or backup code</label>
+                <label className="mb-1 block text-xs font-medium text-slate-600">Verification code (check your email)</label>
                 <input
-                  {...register("mfaCode", { required: mfaRequired })}
+                  {...register("verifyCode", { required: needsCode })}
                   autoComplete="one-time-code"
+                  autoFocus
                   placeholder="6-digit code"
-                  className="mb-2 w-full rounded-xl border border-slate-200/90 bg-slate-50/90 px-3 py-3 text-sm shadow-sm outline-none focus:border-orange-300 focus:bg-white focus:ring-2 focus:ring-orange-500/15"
+                  className="mb-2 w-full rounded-xl border border-orange-300 bg-white px-3 py-3 text-sm shadow-sm outline-none ring-2 ring-orange-500/15 focus:border-orange-400 focus:ring-orange-500/20"
                 />
                 <button
                   type="button"
                   onClick={() => {
-                    setMfaRequired(false);
-                    setValue("mfaCode", "");
+                    setNeedsCode(false);
+                    setValue("verifyCode", "");
                   }}
                   className="mb-3 text-xs font-semibold text-orange-600 hover:text-orange-700"
                 >
-                  Use different account
+                  ← Back to login
                 </button>
               </>
-            ) : null}
+            )}
+
             <button
               type="submit"
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 py-3.5 text-sm font-semibold text-white shadow-lg shadow-slate-900/20 transition hover:bg-slate-800"
             >
-              {mfaRequired ? "Verify and sign in" : "Sign in"}
+              {needsCode ? "Verify and sign in" : "Sign in"}
               <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
             </button>
             <p className="mt-8 text-center text-sm text-slate-500">

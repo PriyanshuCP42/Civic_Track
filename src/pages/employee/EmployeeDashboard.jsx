@@ -18,8 +18,10 @@ const EmployeeDashboard = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    mockApi.allComplaints().then(setRows);
-  }, []);
+    mockApi.allComplaints().then((all) =>
+      setRows(all.filter((r) => r.assignedTo === user.id)),
+    );
+  }, [user.id]);
 
   const active = useMemo(() => rows.filter((r) => ["ASSIGNED", "IN_PROGRESS"].includes(r.status)), [rows]);
 

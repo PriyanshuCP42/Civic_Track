@@ -1,26 +1,22 @@
+import "./config/env.js";
 import cors from "cors";
-import dotenv from "dotenv";
 import express from "express";
-import path from "path";
-import { fileURLToPath } from "url";
-import { createClerkClient } from "@clerk/backend";
+import mongoose from "mongoose";
+import { getClerkClient, getClerkSecretKey } from "./config/clerk.js";
+import { verifyToken, authorize } from "./middleware/auth.js";
+import complaintRoutes from "./routes/complaints.js";
+import { createServer } from "http";
+import { initSocket } from "./utils/socket.js";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const rootDir = path.join(__dirname, "..");
-
-// Load in order; later files override so server-only secrets win.
-dotenv.config({ path: path.join(rootDir, ".env") });
-dotenv.config({ path: path.join(rootDir, ".env.local") });
-dotenv.config({ path: path.join(rootDir, ".env.server") });
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('MongoDB connected'))
+  .catch((err) => { console.error(err); process.exit(1); });
 
 const app = express();
 const port = Number(process.env.API_PORT || 8787);
-const clerkSecretKey = process.env.CLERK_SECRET_KEY;
 
 const ADMIN_EMAIL = "admin@gmail.com";
 const ADMIN_PASSWORD = "Ashmit";
-
-const clerkClient = clerkSecretKey ? createClerkClient({ secretKey: clerkSecretKey }) : null;
 
 const allowedOrigins = [
   "http://localhost:5173",
@@ -43,6 +39,8 @@ app.use(
 );
 app.use(express.json());
 
+app.use('/api/v1/complaints', complaintRoutes);
+
 app.get("/health", (_req, res) => {
   res.json({ ok: true });
 });
@@ -57,7 +55,7 @@ app.post("/api/v1/admin/employees", async (req, res) => {
       return res.status(403).json({ message: "Only admin can create employees." });
     }
 
-    if (!clerkClient) {
+    if (!getClerkClient()) {
       return res.status(500).json({ message: "Missing CLERK_SECRET_KEY in server environment." });
     }
 
@@ -67,7 +65,7 @@ app.post("/api/v1/admin/employees", async (req, res) => {
     }
 
     const firstName = String(name).trim().split(" ")[0] || "Employee";
-    const user = await clerkClient.users.createUser({
+    const user = await getClerkClient().users.createUser({
       emailAddress: [String(email).trim().toLowerCase()],
       password: String(password),
       firstName,
@@ -80,7 +78,7 @@ app.post("/api/v1/admin/employees", async (req, res) => {
 
     const primaryEmail = user.emailAddresses?.[0];
     if (primaryEmail?.id) {
-      await clerkClient.emailAddresses.updateEmailAddress(primaryEmail.id, { verified: true });
+      await getClerkClient().emailAddresses.updateEmailAddress(primaryEmail.id, { verified: true });
     }
 
     return res.status(201).json({
@@ -107,8 +105,41 @@ app.post("/api/v1/admin/employees", async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`CLERK_SECRET_KEY loaded: ${Boolean(clerkSecretKey)}`);
+// GET /api/v1/admin/employees
+app.get("/api/v1/admin/employees", verifyToken, authorize("admin"), async (req, res, next) => {
+  try {
+    if (!getClerkClient()) {
+      return res.status(500).json({ message: "Missing CLERK_SECRET_KEY in server environment." });
+    }
+
+    const { data: users } = await getClerkClient().users.getUserList({ limit: 100 });
+
+    const employees = users
+      .filter((u) => u.publicMetadata?.role === "employee")
+      .map((u) => ({
+        id: u.id,
+        name: u.fullName,
+        email: u.emailAddresses[0]?.emailAddress,
+        department: u.publicMetadata?.department,
+        joinedAt: u.createdAt,
+      }));
+
+    return res.json(employees);
+  } catch (err) {
+    next(err);
+  }
+});
+
+const httpServer = createServer(app);
+const io = initSocket(httpServer, allowedOrigins);
+
+httpServer.listen(port, () => {
+  console.log(`CLERK_SECRET_KEY loaded: ${Boolean(getClerkSecretKey())}`);
   console.log(`SCCMS API running on http://localhost:${port}`);
 });
 
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(err.status || 500).json({ message: err.message || "Server error" });
+});

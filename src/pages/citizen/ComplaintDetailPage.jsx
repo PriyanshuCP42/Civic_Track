@@ -7,6 +7,7 @@ import StatusBadge from "../../components/ui/StatusBadge";
 import MapPicker from "../../components/ui/MapPicker";
 import { adminSurface, pageStack } from "../../lib/adminUi";
 import { mockApi } from "../../api/mockApi";
+import socket from "../../utils/socket";
 
 const ComplaintDetailPage = () => {
   const { id } = useParams();
@@ -25,6 +26,27 @@ const ComplaintDetailPage = () => {
 
   useEffect(() => {
     mockApi.complaintById(id).then(setItem);
+  }, [id]);
+
+  // Socket.io real-time updates
+  useEffect(() => {
+    socket.connect();
+    socket.emit("join_complaint", id);
+
+    const handleStatusUpdated = (data) => {
+      if (data.id === id) {
+        setItem((prev) =>
+          prev ? { ...prev, status: data.status, history: data.history } : prev
+        );
+      }
+    };
+
+    socket.on("status_updated", handleStatusUpdated);
+
+    return () => {
+      socket.off("status_updated", handleStatusUpdated);
+      socket.disconnect();
+    };
   }, [id]);
 
   if (!item) return null;
@@ -80,3 +102,4 @@ const ComplaintDetailPage = () => {
 };
 
 export default ComplaintDetailPage;
+
