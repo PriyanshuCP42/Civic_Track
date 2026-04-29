@@ -1,16 +1,74 @@
-# React + Vite
+# CivicTrack
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+CivicTrack is a civic complaint management system with three clear code areas:
 
-Currently, two official plugins are available:
+- `frontend/`: React/Vite single page app
+- `backend/`: Express API, auth middleware, services, routes, and Socket.IO
+- `database/`: MongoDB connection and Mongoose models
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Project Structure
 
-## React Compiler
+```text
+Civic_Track/
+├── frontend/
+│   ├── index.html
+│   ├── public/
+│   ├── vite.config.js
+│   └── src/
+│       ├── api/
+│       ├── components/
+│       ├── context/
+│       ├── data/
+│       ├── domain/
+│       ├── hooks/
+│       ├── pages/
+│       ├── routes/
+│       └── utils/
+├── backend/
+│   ├── config/
+│   ├── middleware/
+│   ├── routes/
+│   ├── services/
+│   ├── repositories/
+│   ├── policies/
+│   ├── errors/
+│   └── utils/
+├── database/
+│   ├── connect.js
+│   └── models/
+└── uml_diagrams/
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Run Locally
 
-## Expanding the ESLint configuration
+Install dependencies:
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+npm install
+```
+
+Start the backend:
+
+```bash
+npm run dev:api
+```
+
+Start the frontend:
+
+```bash
+npm run dev
+```
+
+## Build
+
+```bash
+npm run build
+```
+
+The frontend builds to the root `dist/` folder for Vercel.
+
+## Useful Docs
+
+- `SYSTEM_DESIGN.md`: full architecture and design explanation
+- `SYSTEM_DESIGN_CODE_MAP.md`: where each design principle is used in code
+- `DEPLOYMENT.md`: Vercel frontend and Render backend deployment steps

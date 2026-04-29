@@ -26,28 +26,35 @@ If PNG images are needed for submission, regenerate PNGs from these Mermaid sour
 
 ```text
 Civic_Track/
-├── src/
-│   ├── api/                 API gateway layer, transport abstraction
-│   ├── components/          Reusable presentation layer
-│   ├── context/             Shared auth state provider
-│   ├── data/                Constants and static app configuration
-│   ├── domain/              Frontend domain classes and policy objects
-│   ├── hooks/               Application state orchestration for React pages
-│   ├── lib/                 Shared UI/helper utilities
-│   ├── pages/               Role-specific page workflows
-│   ├── routes/              Route tree and route guards
-│   └── utils/               Compatibility helpers and socket client
+├── frontend/
+│   ├── index.html           SPA HTML entry
+│   ├── public/              Static browser assets
+│   ├── vite.config.js       Frontend build/dev-server config
+│   └── src/
+│       ├── api/             API gateway layer, transport abstraction
+│       ├── components/      Reusable presentation layer
+│       ├── context/         Shared auth state provider
+│       ├── data/            Constants and static app configuration
+│       ├── domain/          Frontend domain classes and policy objects
+│       ├── hooks/           Application state orchestration for React pages
+│       ├── lib/             Shared UI/helper utilities
+│       ├── pages/           Role-specific page workflows
+│       ├── routes/          Route tree and route guards
+│       └── utils/           Compatibility helpers and socket client
 │
-├── server/
+├── backend/
 │   ├── config/              Environment and backend constants
 │   ├── errors/              Error class hierarchy
 │   ├── middleware/          Express middleware chain
-│   ├── models/              Mongoose persistence schemas
 │   ├── policies/            Decision rules and polymorphic behavior points
 │   ├── repositories/        Database access abstraction
 │   ├── routes/              REST controller layer
 │   ├── services/            Business use cases and orchestration
 │   └── utils/               Backend utilities such as socket and ID helpers
+│
+├── database/
+│   ├── connect.js           MongoDB connection bootstrap
+│   └── models/              Mongoose persistence schemas
 │
 ├── uml_diagrams/
 │   ├── *.png                Legacy exported UML diagrams
@@ -61,51 +68,57 @@ Civic_Track/
 
 | Path | Design Used | Where In Code | Why It Exists |
 | --- | --- | --- | --- |
-| `server/routes/complaints.js` | Controller / REST endpoint layer | Express route handlers | Keeps HTTP request/response handling separate from business rules |
-| `server/routes/admin.js` | Controller / REST endpoint layer | Admin employee endpoints | Delegates employee creation/listing to service classes |
-| `server/services/ComplaintService.js` | Service Layer, Encapsulation, SRP | `ComplaintService` class | Encapsulates complaint creation, assignment, status updates, history updates, ID generation, and notifications |
-| `server/services/EmployeeService.js` | Service Layer, Abstraction, SRP | `EmployeeService` class | Encapsulates Clerk employee creation and employee listing |
-| `server/services/NotificationService.js` | Publisher abstraction, Observer/Pub-Sub | `NotificationService` class | Hides Socket.IO event publishing details from complaint business logic |
-| `server/repositories/ComplaintRepository.js` | Repository Pattern, DIP | `ComplaintRepository` class | Hides Mongoose queries behind a persistence abstraction |
-| `server/policies/ComplaintStatusPolicy.js` | Policy Object, Polymorphism-style dispatch, OCP | `ComplaintStatusPolicy` class | Centralizes which statuses employees can set |
-| `server/policies/AdminCredentialPolicy.js` | Policy Object, SRP | `AdminCredentialPolicy` class | Centralizes the existing admin credential header rule |
-| `server/errors/AppError.js` | Inheritance, Error hierarchy | `AppError`, `InvalidComplaintStatusError` | Provides typed application errors with HTTP status codes |
-| `server/models/Complaint.js` | Data Model / Persistence Contract | Mongoose schema | Defines complaint document structure and database indexes |
-| `server/middleware/auth.js` | Middleware Chain, Authorization policy | `verifyToken`, `authorize` | Separates auth checks from route business logic |
-| `server/middleware/errorHandler.js` | Centralized Error Handling | `errorHandler` | Normalizes thrown errors into `{ message }` API responses |
-| `server/config/constants.js` | Configuration centralization | `SERVER_CONSTANTS` | Avoids scattering backend route names, roles, statuses, socket events, and auth constants |
-| `server/utils/socket.js` | Infrastructure utility | `initSocket`, `getIO` | Owns Socket.IO initialization and room subscription mechanics |
-| `server/utils/complaintId.js` | Utility / ID generation | `generateComplaintId` | Preserves the existing `CMP-####` public ID format |
+| `backend/routes/complaints.js` | Controller / REST endpoint layer | Express route handlers | Keeps HTTP request/response handling separate from business rules |
+| `backend/routes/admin.js` | Controller / REST endpoint layer | Admin employee endpoints | Delegates employee creation/listing to service classes |
+| `backend/services/ComplaintService.js` | Service Layer, Encapsulation, SRP | `ComplaintService` class | Encapsulates complaint creation, assignment, status updates, history updates, ID generation, and notifications |
+| `backend/services/EmployeeService.js` | Service Layer, Abstraction, SRP | `EmployeeService` class | Encapsulates Clerk employee creation and employee listing |
+| `backend/services/NotificationService.js` | Publisher abstraction, Observer/Pub-Sub | `NotificationService` class | Hides Socket.IO event publishing details from complaint business logic |
+| `backend/repositories/ComplaintRepository.js` | Repository Pattern, DIP | `ComplaintRepository` class | Hides Mongoose queries behind a persistence abstraction |
+| `backend/policies/ComplaintStatusPolicy.js` | Policy Object, Polymorphism-style dispatch, OCP | `ComplaintStatusPolicy` class | Centralizes which statuses employees can set |
+| `backend/policies/AdminCredentialPolicy.js` | Policy Object, SRP | `AdminCredentialPolicy` class | Centralizes the existing admin credential header rule |
+| `backend/errors/AppError.js` | Inheritance, Error hierarchy | `AppError`, `InvalidComplaintStatusError` | Provides typed application errors with HTTP status codes |
+| `backend/middleware/auth.js` | Middleware Chain, Authorization policy | `verifyToken`, `authorize` | Separates auth checks from route business logic |
+| `backend/middleware/errorHandler.js` | Centralized Error Handling | `errorHandler` | Normalizes thrown errors into `{ message }` API responses |
+| `backend/config/constants.js` | Configuration centralization | `SERVER_CONSTANTS` | Avoids scattering backend route names, roles, statuses, socket events, and auth constants |
+| `backend/utils/socket.js` | Infrastructure utility | `initSocket`, `getIO` | Owns Socket.IO initialization and room subscription mechanics |
+| `backend/utils/complaintId.js` | Utility / ID generation | `generateComplaintId` | Preserves the existing `CMP-####` public ID format |
+
+## Database Design Mapping
+
+| Path | Design Used | Where In Code | Why It Exists |
+| --- | --- | --- | --- |
+| `database/connect.js` | Persistence bootstrap | `connectDatabase` | Keeps MongoDB connection setup outside the API server entry file |
+| `database/models/Complaint.js` | Data Model / Persistence Contract | Mongoose schema | Defines complaint document structure and database indexes |
 
 ## Frontend Design Mapping
 
 | Path | Design Used | Where In Code | Why It Exists |
 | --- | --- | --- | --- |
-| `src/routes/AppRoutes.jsx` | Router layer, Role-based route composition | React Router route tree | Centralizes route structure and lazy-loaded pages |
-| `src/routes/ProtectedRoute.jsx` | Guard pattern | Authenticated route wrapper | Prevents unauthenticated access |
-| `src/routes/RoleRoute.jsx` | Authorization guard | Role-specific route wrapper | Redirects users away from routes outside their role |
-| `src/context/AuthContext.jsx` | Provider Pattern, State abstraction | `AuthProvider` | Hides Clerk session details and exposes app auth state |
-| `src/hooks/useAllComplaints.js` | Custom Hook, SRP | `useAllComplaints` | Manages all-complaint loading/error state |
-| `src/hooks/useCitizenComplaints.js` | Custom Hook, SRP | `useCitizenComplaints` | Manages citizen-specific complaint state |
-| `src/hooks/useEmployeeComplaints.js` | Custom Hook, API abstraction | `useEmployeeComplaints` | Uses backend filtering for assigned employee complaints |
-| `src/hooks/useComplaintDetails.js` | Custom Hook, Observer/Pub-Sub | `useComplaintDetails` | Combines complaint detail loading with Socket.IO status updates |
-| `src/hooks/useComplaintActions.js` | Command abstraction | `useComplaintActions` | Gives UI components stable mutation functions |
-| `src/hooks/useEmployees.js` | Custom Hook, State orchestration | `useEmployees` | Manages employee list loading and employee creation |
-| `src/api/complaintApi.js` | API Gateway, Abstraction | `complaintApi` object | Hides HTTP endpoints and maps API complaint data into domain objects |
-| `src/api/adminApi.js` | API Gateway | `adminApi` object | Handles current admin employee creation endpoint |
-| `src/api/axiosInstance.js` | Transport abstraction | Axios instance | Centralizes base URL and auth header injection |
-| `src/api/sessionToken.js` | Session token abstraction | `refreshSessionToken` | Refreshes Clerk JWT before backend API calls |
-| `src/api/mockApi.js` | Compatibility adapter | `mockApi` alias | Keeps old imports safe while new code uses `complaintApi` |
-| `src/domain/Complaint.js` | Domain Model / Class | `Complaint` class | Encapsulates complaint API data and future computed behavior |
-| `src/domain/ComplaintStatusPolicy.js` | Policy Object, Polymorphism-style mapping | `ComplaintStatusPolicy` class | Centralizes status badge styling and labels |
-| `src/data/roleConstants.js` | Constant centralization | `ROLES`, `ROLE_VALUES` | Avoids repeated role magic strings |
-| `src/data/statusConstants.js` | Constant centralization | `STATUS`, `categories`, `departments` | Avoids repeated status/category/department literals |
-| `src/components/ui/StatusBadge.jsx` | Presentation component, Policy usage | `StatusBadge` | Uses policy class instead of hardcoded status mapping in JSX |
-| `src/components/ui/ComplaintCard.jsx` | Presentation component | Complaint card UI | Displays complaint data without API knowledge |
-| `src/components/layout/*` | Layout composition | App shell components | Keeps shared navigation/page shell separate from pages |
-| `src/pages/*` | Page composition | Role-specific page components | Pages compose hooks and components instead of owning API details |
-| `src/utils/socket.js` | Infrastructure adapter | Socket.IO client | Centralizes frontend socket client creation |
-| `src/utils/constants.js` | Compatibility re-export | Re-exports status constants | Keeps older imports working after constants moved into `src/data/` |
+| `frontend/src/routes/AppRoutes.jsx` | Router layer, Role-based route composition | React Router route tree | Centralizes route structure and lazy-loaded pages |
+| `frontend/src/routes/ProtectedRoute.jsx` | Guard pattern | Authenticated route wrapper | Prevents unauthenticated access |
+| `frontend/src/routes/RoleRoute.jsx` | Authorization guard | Role-specific route wrapper | Redirects users away from routes outside their role |
+| `frontend/src/context/AuthContext.jsx` | Provider Pattern, State abstraction | `AuthProvider` | Hides Clerk session details and exposes app auth state |
+| `frontend/src/hooks/useAllComplaints.js` | Custom Hook, SRP | `useAllComplaints` | Manages all-complaint loading/error state |
+| `frontend/src/hooks/useCitizenComplaints.js` | Custom Hook, SRP | `useCitizenComplaints` | Manages citizen-specific complaint state |
+| `frontend/src/hooks/useEmployeeComplaints.js` | Custom Hook, API abstraction | `useEmployeeComplaints` | Uses backend filtering for assigned employee complaints |
+| `frontend/src/hooks/useComplaintDetails.js` | Custom Hook, Observer/Pub-Sub | `useComplaintDetails` | Combines complaint detail loading with Socket.IO status updates |
+| `frontend/src/hooks/useComplaintActions.js` | Command abstraction | `useComplaintActions` | Gives UI components stable mutation functions |
+| `frontend/src/hooks/useEmployees.js` | Custom Hook, State orchestration | `useEmployees` | Manages employee list loading and employee creation |
+| `frontend/src/api/complaintApi.js` | API Gateway, Abstraction | `complaintApi` object | Hides HTTP endpoints and maps API complaint data into domain objects |
+| `frontend/src/api/adminApi.js` | API Gateway | `adminApi` object | Handles current admin employee creation endpoint |
+| `frontend/src/api/axiosInstance.js` | Transport abstraction | Axios instance | Centralizes base URL and auth header injection |
+| `frontend/src/api/sessionToken.js` | Session token abstraction | `refreshSessionToken` | Refreshes Clerk JWT before backend API calls |
+| `frontend/src/api/mockApi.js` | Compatibility adapter | `mockApi` alias | Keeps old imports safe while new code uses `complaintApi` |
+| `frontend/src/domain/Complaint.js` | Domain Model / Class | `Complaint` class | Encapsulates complaint API data and future computed behavior |
+| `frontend/src/domain/ComplaintStatusPolicy.js` | Policy Object, Polymorphism-style mapping | `ComplaintStatusPolicy` class | Centralizes status badge styling and labels |
+| `frontend/src/data/roleConstants.js` | Constant centralization | `ROLES`, `ROLE_VALUES` | Avoids repeated role magic strings |
+| `frontend/src/data/statusConstants.js` | Constant centralization | `STATUS`, `categories`, `departments` | Avoids repeated status/category/department literals |
+| `frontend/src/components/ui/StatusBadge.jsx` | Presentation component, Policy usage | `StatusBadge` | Uses policy class instead of hardcoded status mapping in JSX |
+| `frontend/src/components/ui/ComplaintCard.jsx` | Presentation component | Complaint card UI | Displays complaint data without API knowledge |
+| `frontend/src/components/layout/*` | Layout composition | App shell components | Keeps shared navigation/page shell separate from pages |
+| `frontend/src/pages/*` | Page composition | Role-specific page components | Pages compose hooks and components instead of owning API details |
+| `frontend/src/utils/socket.js` | Infrastructure adapter | Socket.IO client | Centralizes frontend socket client creation |
+| `frontend/src/utils/constants.js` | Compatibility re-export | Re-exports status constants | Keeps older imports working after constants moved into `frontend/src/data/` |
 
 ## OOP Principles In The Code
 
@@ -156,7 +169,7 @@ Error
 
 Files:
 
-- `server/errors/AppError.js`
+- `backend/errors/AppError.js`
 
 This gives all app errors a shared shape while specialized errors can still represent specific cases.
 
@@ -194,15 +207,15 @@ It asks ComplaintStatusPolicy for the correct style and label.
 
 | Pattern | Implementation | Files |
 | --- | --- | --- |
-| Service Layer | Business use cases | `server/services/*.js` |
-| Repository | Persistence gateway | `server/repositories/ComplaintRepository.js` |
-| Policy Object | Decision rules | `server/policies/*.js`, `src/domain/ComplaintStatusPolicy.js` |
-| Adapter / API Gateway | Frontend API wrapper | `src/api/complaintApi.js`, `src/api/adminApi.js` |
-| Provider | Auth state distribution | `src/context/AuthContext.jsx` |
-| Guard | Protected and role-specific routes | `src/routes/ProtectedRoute.jsx`, `src/routes/RoleRoute.jsx` |
-| Observer / Pub-Sub | Realtime status updates | `server/services/NotificationService.js`, `src/hooks/useComplaintDetails.js` |
+| Service Layer | Business use cases | `backend/services/*.js` |
+| Repository | Persistence gateway | `backend/repositories/ComplaintRepository.js` |
+| Policy Object | Decision rules | `backend/policies/*.js`, `frontend/src/domain/ComplaintStatusPolicy.js` |
+| Adapter / API Gateway | Frontend API wrapper | `frontend/src/api/complaintApi.js`, `frontend/src/api/adminApi.js` |
+| Provider | Auth state distribution | `frontend/src/context/AuthContext.jsx` |
+| Guard | Protected and role-specific routes | `frontend/src/routes/ProtectedRoute.jsx`, `frontend/src/routes/RoleRoute.jsx` |
+| Observer / Pub-Sub | Realtime status updates | `backend/services/NotificationService.js`, `frontend/src/hooks/useComplaintDetails.js` |
 | Factory Method | API-to-domain conversion | `Complaint.fromApiResponse`, `Complaint.listFromApiResponse` |
-| Middleware Chain | Express request pipeline | `server/middleware/*.js` |
+| Middleware Chain | Express request pipeline | `backend/middleware/*.js` |
 
 ## Current Request Flow Mapped To Code
 
