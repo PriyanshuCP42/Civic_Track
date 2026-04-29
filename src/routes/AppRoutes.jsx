@@ -3,6 +3,7 @@ import { AuthenticateWithRedirectCallback } from "@clerk/clerk-react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import AppLayout from "../components/layout/AppLayout";
 import { useAuth } from "../context/useAuth";
+import { ROLES } from "../data/roleConstants";
 import RoleRoute from "./RoleRoute";
 
 const LoginPage = lazy(() => import("../pages/auth/LoginPage"));
@@ -60,7 +61,7 @@ export default function AppRoutes() {
         <Route
           path="/citizen"
           element={
-            <RoleRoute role="citizen">
+            <RoleRoute role={ROLES.CITIZEN}>
               <AppLayout />
             </RoleRoute>
           }
@@ -76,7 +77,7 @@ export default function AppRoutes() {
         <Route
           path="/admin"
           element={
-            <RoleRoute role="admin">
+            <RoleRoute role={ROLES.ADMIN}>
               <AppLayout />
             </RoleRoute>
           }
@@ -93,7 +94,7 @@ export default function AppRoutes() {
         <Route
           path="/employee"
           element={
-            <RoleRoute role="employee">
+            <RoleRoute role={ROLES.EMPLOYEE}>
               <AppLayout />
             </RoleRoute>
           }

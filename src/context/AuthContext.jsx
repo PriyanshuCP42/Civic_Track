@@ -1,18 +1,19 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth as useClerkAuth, useClerk, useUser } from "@clerk/clerk-react";
 import { AUTH_CONSTANTS } from "../data/authConstants";
+import { ROLES, ROLE_VALUES } from "../data/roleConstants";
 import { AuthContext } from "./authContextObject";
 
 const normalizeRole = (value) => {
   if (!value || typeof value !== "string") return null;
   const lower = value.toLowerCase();
-  return ["citizen", "admin", "employee"].includes(lower) ? lower : null;
+  return ROLE_VALUES.includes(lower) ? lower : null;
 };
 
 const deriveRole = (clerkUser) => {
   const email = clerkUser?.primaryEmailAddress?.emailAddress?.toLowerCase() || "";
-  if (email === AUTH_CONSTANTS.ADMIN_EMAIL) return "admin";
-  return normalizeRole(clerkUser?.publicMetadata?.role) || "citizen";
+  if (email === AUTH_CONSTANTS.ADMIN_EMAIL) return ROLES.ADMIN;
+  return normalizeRole(clerkUser?.publicMetadata?.role) || ROLES.CITIZEN;
 };
 
 export const AuthProvider = ({ children }) => {
@@ -71,7 +72,7 @@ export const AuthProvider = ({ children }) => {
     setProfilePatch((prev) => ({
       ...prev,
       role,
-      department: role === "employee" ? department || "" : "",
+      department: role === ROLES.EMPLOYEE ? department || "" : "",
     }));
   }, []);
 
@@ -88,7 +89,7 @@ export const AuthProvider = ({ children }) => {
       clerkId: "hardcoded-admin",
       name: "Admin",
       email: AUTH_CONSTANTS.ADMIN_EMAIL,
-      role: "admin",
+      role: ROLES.ADMIN,
       department: "",
       joinedAt: new Date().toISOString(),
     });

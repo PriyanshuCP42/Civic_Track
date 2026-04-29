@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { mockApi } from "../api/mockApi";
+import { complaintApi } from "../api/complaintApi";
 
 /**
  * Manage global complaints dataset state.
@@ -20,7 +20,7 @@ export function useAllComplaints() {
     setIsLoading(true);
     setErrorMessage("");
     try {
-      const response = await mockApi.allComplaints();
+      const response = await complaintApi.allComplaints();
       setComplaints(response);
     } catch (error) {
       setErrorMessage(error?.message || "Unable to load complaints.");

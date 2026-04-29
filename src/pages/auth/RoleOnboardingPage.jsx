@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "../../context/useAuth";
+import { ROLES } from "../../data/roleConstants";
 import { departments } from "../../utils/constants";
 
 const RoleOnboardingPage = () => {
@@ -12,8 +13,8 @@ const RoleOnboardingPage = () => {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm({ defaultValues: { role: "citizen", department: "" } });
-  const [role, setRole] = useState("citizen");
+  } = useForm({ defaultValues: { role: ROLES.CITIZEN, department: "" } });
+  const [role, setRole] = useState(ROLES.CITIZEN);
 
   const onSubmit = async (values) => {
     await completeRoleOnboarding(values);
@@ -29,9 +30,9 @@ const RoleOnboardingPage = () => {
 
         <div className="mt-6 grid grid-cols-3 gap-2">
           {[
-            { id: "citizen", label: "Citizen" },
-            { id: "employee", label: "Employee" },
-            { id: "admin", label: "Admin" },
+            { id: ROLES.CITIZEN, label: "Citizen" },
+            { id: ROLES.EMPLOYEE, label: "Employee" },
+            { id: ROLES.ADMIN, label: "Admin" },
           ].map((item) => (
             <label
               key={item.id}
@@ -51,7 +52,7 @@ const RoleOnboardingPage = () => {
           ))}
         </div>
 
-        {role === "employee" ? (
+        {role === ROLES.EMPLOYEE ? (
           <>
             <select {...register("department", { required: "Department is required for employees" })} className="mt-4 w-full rounded-lg border border-slate-200 px-3 py-2">
               <option value="">Select Department</option>

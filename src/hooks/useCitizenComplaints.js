@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { mockApi } from "../api/mockApi";
+import { complaintApi } from "../api/complaintApi";
 
 /**
  * Manage citizen complaints collection state.
@@ -22,7 +22,7 @@ export function useCitizenComplaints(citizenId) {
     setIsLoading(true);
     setErrorMessage("");
     try {
-      const response = await mockApi.meComplaints(citizenId);
+      const response = await complaintApi.meComplaints(citizenId);
       setComplaints(response);
     } catch (error) {
       setErrorMessage(error?.message || "Unable to load complaints.");

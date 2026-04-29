@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { mockApi } from "../api/mockApi";
+import { complaintApi } from "../api/complaintApi";
 
 /**
  * Manage complaints assigned to an employee.
@@ -22,8 +22,8 @@ export function useEmployeeComplaints(employeeId) {
     setIsLoading(true);
     setErrorMessage("");
     try {
-      const response = await mockApi.allComplaints();
-      setComplaints(response.filter((complaint) => complaint.assignedTo === employeeId));
+      const response = await complaintApi.employeeComplaints(employeeId);
+      setComplaints(response);
     } catch (error) {
       setErrorMessage(error?.message || "Unable to load assigned complaints.");
       setComplaints([]);
