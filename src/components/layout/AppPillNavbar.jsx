@@ -1,10 +1,11 @@
 import { NavLink } from "react-router-dom";
 import { MapPinned } from "lucide-react";
 import { useAuth } from "../../context/useAuth";
+import { ROLES } from "../../data/roleConstants";
 import { cn } from "@/lib/utils";
 
 const config = {
-  admin: {
+  [ROLES.ADMIN]: {
     home: "/admin/dashboard",
     links: [
       { to: "/admin/dashboard", label: "Dashboard" },
@@ -16,7 +17,7 @@ const config = {
     cta: { to: "/admin/employees", label: "Invite staff" },
     navLabel: "Admin navigation",
   },
-  citizen: {
+  [ROLES.CITIZEN]: {
     home: "/citizen/dashboard",
     links: [
       { to: "/citizen/dashboard", label: "Dashboard" },
@@ -27,7 +28,7 @@ const config = {
     cta: { to: "/citizen/complaints/new", label: "Report issue" },
     navLabel: "Citizen navigation",
   },
-  employee: {
+  [ROLES.EMPLOYEE]: {
     home: "/employee/dashboard",
     links: [
       { to: "/employee/dashboard", label: "Dashboard" },
@@ -47,8 +48,8 @@ const linkClass = ({ isActive }) =>
 
 const AppPillNavbar = () => {
   const { user, logout } = useAuth();
-  const role = user?.role || "citizen";
-  const c = config[role] || config.citizen;
+  const role = user?.role || ROLES.CITIZEN;
+  const c = config[role] || config[ROLES.CITIZEN];
 
   return (
     <header className="pointer-events-none fixed inset-x-0 top-0 z-50 flex justify-center px-4 pt-5 sm:px-6 sm:pt-6 md:px-8 md:pt-7">

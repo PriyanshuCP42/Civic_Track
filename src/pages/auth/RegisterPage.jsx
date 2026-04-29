@@ -5,10 +5,15 @@ import { useSignUp } from "@clerk/clerk-react";
 import { ArrowRight, Eye, EyeOff, Globe, Lock, Mail, MapPinned, User } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "../../context/useAuth";
+import { AUTH_CONSTANTS } from "../../data/authConstants";
+import { ROLES } from "../../data/roleConstants";
 import { cn } from "@/lib/utils";
 import AuthPageBackdrop from "./AuthPageBackdrop";
 
-const ADMIN_EMAIL = "admin@gmail.com";
+const ACCOUNT_KIND = {
+  CITIZEN: ROLES.CITIZEN,
+  STAFF: "staff",
+};
 
 const RegisterPage = () => {
   const { user, loading } = useAuth();
@@ -23,7 +28,7 @@ const RegisterPage = () => {
   const strength = Math.min(100, passwordValue.length * 12.5);
   const [showPw, setShowPw] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [accountKind, setAccountKind] = useState("citizen");
+  const [accountKind, setAccountKind] = useState(ACCOUNT_KIND.CITIZEN);
 
   if (!loading && user) {
     return <Navigate to={`/${user.role}`} replace />;
@@ -31,7 +36,7 @@ const RegisterPage = () => {
 
   const onSubmit = async (values) => {
     if (!isLoaded) return;
-    if (values.email?.trim().toLowerCase() === ADMIN_EMAIL) {
+    if (values.email?.trim().toLowerCase() === AUTH_CONSTANTS.ADMIN_EMAIL) {
       toast.error("This email is reserved for admin login.");
       return;
     }
@@ -112,10 +117,10 @@ const RegisterPage = () => {
             <div className="mt-6 flex rounded-xl bg-slate-100 p-1">
               <button
                 type="button"
-                onClick={() => setAccountKind("citizen")}
+                onClick={() => setAccountKind(ACCOUNT_KIND.CITIZEN)}
                 className={cn(
                   "flex-1 rounded-lg py-2.5 text-sm font-semibold transition",
-                  accountKind === "citizen"
+                  accountKind === ACCOUNT_KIND.CITIZEN
                     ? "bg-white text-slate-900 shadow-sm ring-1 ring-slate-200/80"
                     : "text-slate-500 hover:text-slate-700",
                 )}
@@ -124,10 +129,10 @@ const RegisterPage = () => {
               </button>
               <button
                 type="button"
-                onClick={() => setAccountKind("staff")}
+                onClick={() => setAccountKind(ACCOUNT_KIND.STAFF)}
                 className={cn(
                   "flex-1 rounded-lg py-2.5 text-sm font-semibold transition",
-                  accountKind === "staff"
+                  accountKind === ACCOUNT_KIND.STAFF
                     ? "bg-white text-slate-900 shadow-sm ring-1 ring-slate-200/80"
                     : "text-slate-500 hover:text-slate-700",
                 )}
@@ -136,7 +141,7 @@ const RegisterPage = () => {
               </button>
             </div>
 
-            {accountKind === "staff" ? (
+            {accountKind === ACCOUNT_KIND.STAFF ? (
               <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50/80 p-5 text-sm leading-relaxed text-slate-600">
                 <p className="font-medium text-slate-800">Municipal staff accounts</p>
                 <p className="mt-2">

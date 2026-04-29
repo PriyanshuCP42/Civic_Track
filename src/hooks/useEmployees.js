@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { adminApi } from "../api/adminApi";
-import { mockApi } from "../api/mockApi";
+import { complaintApi } from "../api/complaintApi";
 
 /**
  * Manage employee directory state and creation actions.
@@ -21,7 +21,7 @@ export function useEmployees() {
     setIsLoading(true);
     setErrorMessage("");
     try {
-      const response = await mockApi.employees();
+      const response = await complaintApi.employees();
       setEmployees(response);
     } catch (error) {
       setErrorMessage(error?.message || "Unable to load employees.");
@@ -40,7 +40,7 @@ export function useEmployees() {
       if (error?.status === 409 || error?.code === "NETWORK") {
         throw error;
       }
-      const localCreated = await mockApi.createEmployee(payload);
+      const localCreated = await complaintApi.createEmployee(payload);
       setEmployees((previous) => [localCreated, ...previous]);
       return { employee: localCreated, source: "local" };
     }

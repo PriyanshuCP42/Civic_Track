@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { mockApi } from "../api/mockApi";
+import { complaintApi } from "../api/complaintApi";
 import socket from "../utils/socket";
 import { SOCKET_EVENTS } from "../data/socketConstants";
 
@@ -24,7 +24,7 @@ export function useComplaintDetails(complaintId) {
       setIsLoading(true);
       setErrorMessage("");
       try {
-        const response = await mockApi.complaintById(complaintId);
+        const response = await complaintApi.complaintById(complaintId);
         if (isMounted) setComplaint(response);
       } catch (error) {
         if (isMounted) {

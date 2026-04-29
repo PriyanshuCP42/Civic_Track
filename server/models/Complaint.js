@@ -28,4 +28,9 @@ const complaintSchema = new mongoose.Schema({
   ]
 });
 
+complaintSchema.index({ citizenId: 1, submittedAt: -1 });
+complaintSchema.index({ assignedTo: 1, status: 1 });
+complaintSchema.index({ status: 1, submittedAt: -1 });
+complaintSchema.index({ location: "2dsphere" });
+
 export default mongoose.model("Complaint", complaintSchema);
