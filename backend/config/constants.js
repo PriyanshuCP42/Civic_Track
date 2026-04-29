@@ -1,3 +1,17 @@
+const DEFAULT_ALLOWED_ORIGINS = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "http://127.0.0.1:5173",
+  "http://127.0.0.1:5174",
+];
+
+function parseOrigins(value) {
+  return String(value || "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+}
+
 /**
  * Shared backend constants.
  */
@@ -25,10 +39,10 @@ export const SERVER_CONSTANTS = {
   ADMIN_PASSWORD: "Ashmit",
   DEFAULT_API_PORT: 8787,
   ALLOWED_ORIGINS: [
-    "http://localhost:5173",
-    "http://localhost:5174",
-    "http://127.0.0.1:5173",
-    "http://127.0.0.1:5174",
+    ...new Set([
+      ...DEFAULT_ALLOWED_ORIGINS,
+      ...parseOrigins(process.env.CORS_ORIGINS || process.env.CLIENT_ORIGIN),
+    ]),
   ],
   COMPLAINT_STATUS: {
     PENDING: "PENDING",

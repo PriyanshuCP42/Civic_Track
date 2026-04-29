@@ -1,7 +1,6 @@
 import "./config/env.js";
 import cors from "cors";
 import express from "express";
-import mongoose from "mongoose";
 import { getClerkSecretKey } from "./config/clerk.js";
 import complaintRoutes from "./routes/complaints.js";
 import adminRoutes from "./routes/admin.js";
@@ -9,13 +8,14 @@ import { createServer } from "http";
 import { initSocket } from "./utils/socket.js";
 import { SERVER_CONSTANTS } from "./config/constants.js";
 import { errorHandler } from "./middleware/errorHandler.js";
+import { connectDatabase } from "../database/connect.js";
 
-mongoose.connect(process.env.MONGO_URI)
+connectDatabase()
   .then(() => {})
   .catch((err) => { console.error(err); process.exit(1); });
 
 const app = express();
-const port = Number(process.env.API_PORT || SERVER_CONSTANTS.DEFAULT_API_PORT);
+const port = Number(process.env.PORT || process.env.API_PORT || SERVER_CONSTANTS.DEFAULT_API_PORT);
 const allowedOrigins = SERVER_CONSTANTS.ALLOWED_ORIGINS;
 
 app.use(
@@ -39,12 +39,13 @@ app.get(SERVER_CONSTANTS.ROUTES.HEALTH, (_req, res) => {
   res.json({ ok: true });
 });
 
+app.use(errorHandler);
+
 const httpServer = createServer(app);
 initSocket(httpServer, allowedOrigins);
 
-httpServer.listen(port, () => {
+httpServer.listen(port, "0.0.0.0", () => {
   if (!getClerkSecretKey()) {
     console.error("CLERK_SECRET_KEY is missing.");
   }
 });
-app.use(errorHandler);

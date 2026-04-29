@@ -13,7 +13,7 @@ export const adminApi = {
     let response;
     try {
       response = await fetch(
-        `${AUTH_CONSTANTS.API_BASE_URL}/api/v1/admin/employees`,
+        `${AUTH_CONSTANTS.API_BASE_URL}/admin/employees`,
         {
         method: "POST",
         headers: {
@@ -46,4 +46,3 @@ export const adminApi = {
     return data;
   },
 };
-

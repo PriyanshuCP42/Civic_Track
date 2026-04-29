@@ -107,7 +107,7 @@ flowchart TB
   SocketIO --> Browser
 ```
 
-In development, Vite proxies `/api` and `/socket.io` to the Express server. The frontend API client uses `/api/v1` through the proxy for most complaint operations. Employee creation currently uses `AUTH_CONSTANTS.API_BASE_URL`, which points to `http://localhost:8787`.
+In development, Vite proxies `/api` and `/socket.io` to the Express server. The frontend API client uses `/api/v1` through the proxy locally, or `VITE_API_ORIGIN` / `VITE_SOCKET_URL` when deployed.
 
 ## 6. Architectural Layers
 
@@ -115,15 +115,15 @@ In development, Vite proxies `/api` and `/socket.io` to the Express server. The 
 
 | Directory | Responsibility |
 | --- | --- |
-| `src/routes/` | Route tree, role gates, redirects, page lazy loading |
-| `src/pages/` | Page-level composition and workflow screens |
-| `src/components/` | Reusable UI components and layout components |
-| `src/hooks/` | Stateful data-fetching and mutation orchestration |
-| `src/api/` | HTTP transport and backend API wrappers |
-| `src/context/` | Auth state and session distribution |
-| `src/data/` | Static constants and app-level data |
-| `src/utils/` | Pure helper values and utility functions |
-| `src/lib/` | Shared UI tokens and future domain abstractions |
+| `frontend/src/routes/` | Route tree, role gates, redirects, page lazy loading |
+| `frontend/src/pages/` | Page-level composition and workflow screens |
+| `frontend/src/components/` | Reusable UI components and layout components |
+| `frontend/src/hooks/` | Stateful data-fetching and mutation orchestration |
+| `frontend/src/api/` | HTTP transport and backend API wrappers |
+| `frontend/src/context/` | Auth state and session distribution |
+| `frontend/src/data/` | Static constants and app-level data |
+| `frontend/src/utils/` | Pure helper values and utility functions |
+| `frontend/src/lib/` | Shared UI tokens and future domain abstractions |
 
 Recommended dependency direction:
 
@@ -146,23 +146,25 @@ Frontend rules:
 
 | Directory | Responsibility |
 | --- | --- |
-| `server/index.js` | Application bootstrap, middleware registration, server startup |
-| `server/config/` | Environment, constants, Clerk configuration |
-| `server/middleware/` | Authentication, authorization, error handling |
-| `server/routes/` | HTTP endpoint wiring |
-| `server/services/` | Application use cases and lifecycle orchestration |
-| `server/repositories/` | Persistence gateway abstractions |
-| `server/policies/` | Role, credential, and status decision rules |
-| `server/errors/` | Typed application errors |
-| `server/models/` | Mongoose schemas and persistence contracts |
-| `server/utils/` | Socket helper and ID generation |
+| `backend/index.js` | Application bootstrap, middleware registration, server startup |
+| `backend/config/` | Environment, constants, Clerk configuration |
+| `backend/middleware/` | Authentication, authorization, error handling |
+| `backend/routes/` | HTTP endpoint wiring |
+| `backend/services/` | Application use cases and lifecycle orchestration |
+| `backend/repositories/` | Persistence gateway abstractions |
+| `backend/policies/` | Role, credential, and status decision rules |
+| `backend/errors/` | Typed application errors |
+| `database/connect.js` | MongoDB connection bootstrap |
+| `database/models/` | Mongoose schemas and persistence contracts |
+| `backend/utils/` | Socket helper and ID generation |
 
 Recommended dependency direction:
 
 ```text
-index -> routes -> middleware/models/utils/config
+backend/index -> backend/routes -> backend/services
+backend/services -> backend/repositories -> database/models
 middleware -> config/Clerk
-models -> mongoose only
+database/models -> mongoose only
 utils -> config only
 ```
 
@@ -380,10 +382,10 @@ Each module should have one reason to change.
 
 Current examples:
 
-- `src/api/axiosInstance.js`: configures HTTP client only
-- `src/hooks/useAllComplaints.js`: manages all-complaint loading state
-- `server/middleware/auth.js`: verifies identity and role access
-- `server/models/Complaint.js`: defines persistence schema
+- `frontend/src/api/axiosInstance.js`: configures HTTP client only
+- `frontend/src/hooks/useAllComplaints.js`: manages all-complaint loading state
+- `backend/middleware/auth.js`: verifies identity and role access
+- `database/models/Complaint.js`: defines persistence schema
 
 Improvement:
 
@@ -447,7 +449,7 @@ This makes testing easier because services can use fake repositories and fake no
 The backend now uses service, repository, policy, and error layers around complaint and employee behavior. As the system grows, keep adding business behavior to these layers instead of pushing it back into route handlers:
 
 ```text
-server/
+backend/
   services/
     ComplaintService.js
     EmployeeService.js
@@ -694,9 +696,9 @@ flowchart LR
 
 ### Backend Design Principles
 
-- Keep bootstrap code in `server/index.js`.
+- Keep bootstrap code in `backend/index.js`.
 - Keep authentication and role checks in middleware.
-- Keep database schema in models.
+- Keep database schema in `database/models/`.
 - Keep constants in config.
 - Move domain rules into services as complexity grows.
 
@@ -1031,10 +1033,9 @@ These are not failures; they are normal MVP-to-production gaps.
 ## 26. Suggested Package Structure After Refactor
 
 ```text
-server/
+backend/
   config/
   middleware/
-  models/
   routes/
   services/
     ComplaintService.js
@@ -1051,7 +1052,12 @@ server/
     errorTypes.js
   utils/
 
-src/
+database/
+  connect.js
+  models/
+    Complaint.js
+
+frontend/src/
   api/
     complaintApi.js
     employeeApi.js

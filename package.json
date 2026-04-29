@@ -4,11 +4,13 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "dev:api": "node server/index.js",
-    "build": "vite build",
+    "dev": "vite --config frontend/vite.config.js",
+    "dev:api": "node backend/index.js",
+    "start": "node backend/index.js",
+    "start:api": "node backend/index.js",
+    "build": "vite build --config frontend/vite.config.js",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview --config frontend/vite.config.js"
   },
   "dependencies": {
     "@clerk/backend": "^3.2.10",

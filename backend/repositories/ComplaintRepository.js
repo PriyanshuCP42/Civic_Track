@@ -1,4 +1,4 @@
-import Complaint from "../models/Complaint.js";
+import Complaint from "../../database/models/Complaint.js";
 
 /**
  * Persistence gateway for complaint documents.
