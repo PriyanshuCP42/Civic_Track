@@ -6,5 +6,11 @@ import mongoose from "mongoose";
  * @returns {Promise<typeof mongoose>}
  */
 export function connectDatabase(uri = process.env.MONGO_URI) {
-  return mongoose.connect(uri);
+  if (!uri) {
+    throw new Error("MONGO_URI is missing. Add it in Render > Environment before deploying.");
+  }
+
+  return mongoose.connect(uri, {
+    serverSelectionTimeoutMS: Number(process.env.MONGO_SERVER_SELECTION_TIMEOUT_MS || 10000),
+  });
 }
