@@ -2,26 +2,6 @@
 
 This document maps the current codebase folder structure to the system design, OOP principles, SOLID principles, and design patterns used in the implementation.
 
-## Current UML Status
-
-The existing PNG diagrams in `uml_diagrams/` were created before the latest service/repository/policy refactor, so they should be treated as legacy diagrams.
-
-Current UML source files have been added under:
-
-```text
-uml_diagrams/current/
-```
-
-These Mermaid files represent the current code structure more accurately:
-
-- `uml_diagrams/current/class_diagram.mmd`
-- `uml_diagrams/current/component_diagram.mmd`
-- `uml_diagrams/current/sequence_complaint_lifecycle.mmd`
-- `uml_diagrams/current/er_diagram.mmd`
-- `uml_diagrams/current/use_case_diagram.mmd`
-
-If PNG images are needed for submission, regenerate PNGs from these Mermaid source files and replace or add new exported images.
-
 ## Folder Structure With Design Mapping
 
 ```text
