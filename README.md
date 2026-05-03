@@ -6,24 +6,34 @@
   A full-stack civic complaint management system with real-time updates, role-based access, and geospatial complaint tracking — built for modern municipalities.
 </p>
 
+<br/>
+
+### 🛠 Tech Stack
+
 <p align="center">
-  <img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=white&labelColor=0d1117" />
-  <img src="https://img.shields.io/badge/Vite-8-646CFF?style=for-the-badge&logo=vite&logoColor=white&labelColor=0d1117" />
-  <img src="https://img.shields.io/badge/TailwindCSS-3-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white&labelColor=0d1117" />
-  <img src="https://img.shields.io/badge/Express-5-000000?style=for-the-badge&logo=express&logoColor=white&labelColor=0d1117" />
-  <img src="https://img.shields.io/badge/MongoDB-Atlas-47A248?style=for-the-badge&logo=mongodb&logoColor=white&labelColor=0d1117" />
+  <a href="https://react.dev"><img src="https://skillicons.dev/icons?i=react" title="React 19" /></a>&nbsp;
+  <a href="https://vitejs.dev"><img src="https://skillicons.dev/icons?i=vite" title="Vite 8" /></a>&nbsp;
+  <a href="https://tailwindcss.com"><img src="https://skillicons.dev/icons?i=tailwind" title="Tailwind CSS" /></a>&nbsp;
+  <a href="https://expressjs.com"><img src="https://skillicons.dev/icons?i=express" title="Express 5" /></a>&nbsp;
+  <a href="https://www.mongodb.com"><img src="https://skillicons.dev/icons?i=mongodb" title="MongoDB Atlas" /></a>&nbsp;
+  <a href="https://nodejs.org"><img src="https://skillicons.dev/icons?i=nodejs" title="Node.js" /></a>&nbsp;
+  <a href="https://socket.io"><img src="https://skillicons.dev/icons?i=socketio" title="Socket.IO 4" /></a>&nbsp;
+  <a href="https://reactrouter.com"><img src="https://skillicons.dev/icons?i=react" title="React Router 7" /></a>&nbsp;
+  <a href="https://leafletjs.com"><img src="https://skillicons.dev/icons?i=js" title="Leaflet Maps" /></a>
 </p>
+
+<br/>
+
 <p align="center">
-  <img src="https://img.shields.io/badge/Socket.IO-4-010101?style=for-the-badge&logo=socketdotio&logoColor=white&labelColor=0d1117" />
-  <img src="https://img.shields.io/badge/Clerk-Auth-6C47FF?style=for-the-badge&logo=clerk&logoColor=white&labelColor=0d1117" />
-  <img src="https://img.shields.io/badge/React_Router-7-CA4245?style=for-the-badge&logo=reactrouter&logoColor=white&labelColor=0d1117" />
-  <img src="https://img.shields.io/badge/Recharts-3-22C55E?style=for-the-badge&logo=chartdotjs&logoColor=white&labelColor=0d1117" />
-  <img src="https://img.shields.io/badge/Leaflet-Maps-199900?style=for-the-badge&logo=leaflet&logoColor=white&labelColor=0d1117" />
-</p>
-<p align="center">
-  <img src="https://img.shields.io/badge/Deployed_on-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white&labelColor=0d1117" />
-  <img src="https://img.shields.io/badge/API_on-Render-46E3B7?style=for-the-badge&logo=render&logoColor=white&labelColor=0d1117" />
-  <img src="https://img.shields.io/badge/Node.js-22-339933?style=for-the-badge&logo=nodedotjs&logoColor=white&labelColor=0d1117" />
+  <img src="https://img.shields.io/badge/Vercel-Deployed-000000?style=flat-square&logo=vercel&logoColor=white" />
+  &nbsp;
+  <img src="https://img.shields.io/badge/Render-API%20Server-46E3B7?style=flat-square&logo=render&logoColor=white" />
+  &nbsp;
+  <img src="https://img.shields.io/badge/MongoDB-Atlas-47A248?style=flat-square&logo=mongodb&logoColor=white" />
+  &nbsp;
+  <img src="https://img.shields.io/badge/Clerk-Auth-6C47FF?style=flat-square&logo=clerk&logoColor=white" />
+  &nbsp;
+  <img src="https://img.shields.io/badge/Socket.IO-Realtime-010101?style=flat-square&logo=socketdotio&logoColor=white" />
 </p>
 
 </div>
