@@ -1,6 +1,6 @@
 <div align="center">
 
-<img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=200&section=header&text=CivicTrack&fontSize=56&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Smart%20Civic%20Complaint%20Management%20for%20Modern%20Municipalities&descAlignY=56&descSize=17" />
+<img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=0:F97316,50:EA580C,100:92400E&height=200&section=header&text=CivicTrack&fontSize=56&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Smart%20Civic%20Complaint%20Management%20for%20Modern%20Municipalities&descAlignY=56&descSize=17" />
 
 <p>Citizens submit. Admins assign. Employees resolve — all in real time.</p>
 
