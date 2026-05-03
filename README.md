@@ -1,32 +1,38 @@
 <div align="center">
 
-<img src="https://readme-typing-svg.demolab.com?font=Outfit&weight=800&size=52&duration=2500&pause=800&color=6366F1&center=true&vCenter=true&width=700&height=80&lines=🏙️+CivicTrack" alt="CivicTrack" />
-
-<p><strong>Smart Civic Complaint Management · Built for Modern Municipalities</strong></p>
+<img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=200&section=header&text=CivicTrack&fontSize=56&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Smart%20Civic%20Complaint%20Management%20for%20Modern%20Municipalities&descAlignY=56&descSize=17" />
 
 <p>Citizens submit. Admins assign. Employees resolve — all in real time.</p>
 
 <br/>
 
 <p>
-  <img alt="React" src="https://img.shields.io/badge/-React-0d1117?style=flat-square&logo=react&logoColor=61DAFB" />
-  <img alt="Vite" src="https://img.shields.io/badge/-Vite-0d1117?style=flat-square&logo=vite&logoColor=646CFF" />
-  <img alt="Tailwind CSS" src="https://img.shields.io/badge/-Tailwind_CSS-0d1117?style=flat-square&logo=tailwindcss&logoColor=06B6D4" />
-  <img alt="Express" src="https://img.shields.io/badge/-Express-0d1117?style=flat-square&logo=express&logoColor=ffffff" />
-  <img alt="MongoDB" src="https://img.shields.io/badge/-MongoDB-0d1117?style=flat-square&logo=mongodb&logoColor=47A248" />
-  <img alt="Node.js" src="https://img.shields.io/badge/-Node.js-0d1117?style=flat-square&logo=nodedotjs&logoColor=68A063" />
-  <img alt="Socket.IO" src="https://img.shields.io/badge/-Socket.IO-0d1117?style=flat-square&logo=socketdotio&logoColor=ffffff" />
-  <img alt="Clerk" src="https://img.shields.io/badge/-Clerk-0d1117?style=flat-square&logo=clerk&logoColor=6C47FF" />
-  <img alt="React Router" src="https://img.shields.io/badge/-React_Router-0d1117?style=flat-square&logo=reactrouter&logoColor=CA4245" />
-  <img alt="Recharts" src="https://img.shields.io/badge/-Recharts-0d1117?style=flat-square&logo=chartdotjs&logoColor=22C55E" />
-  <img alt="Leaflet" src="https://img.shields.io/badge/-Leaflet-0d1117?style=flat-square&logo=leaflet&logoColor=199900" />
+  <img src="https://img.shields.io/badge/FRAMEWORK-React-61DAFB?style=for-the-badge&logo=react&logoColor=000000" />
+  <img src="https://img.shields.io/badge/BUILD-Vite-646CFF?style=for-the-badge&logo=vite&logoColor=ffffff" />
+  <img src="https://img.shields.io/badge/STYLING-TailwindCSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=ffffff" />
+  <img src="https://img.shields.io/badge/API-Express-000000?style=for-the-badge&logo=express&logoColor=ffffff" />
+</p>
+<p>
+  <img src="https://img.shields.io/badge/DATABASE-MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=ffffff" />
+  <img src="https://img.shields.io/badge/RUNTIME-Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=ffffff" />
+  <img src="https://img.shields.io/badge/REALTIME-Socket.IO-010101?style=for-the-badge&logo=socketdotio&logoColor=ffffff" />
+  <img src="https://img.shields.io/badge/AUTH-Clerk-6C47FF?style=for-the-badge&logo=clerk&logoColor=ffffff" />
+</p>
+<p>
+  <img src="https://img.shields.io/badge/ROUTING-React_Router-CA4245?style=for-the-badge&logo=reactrouter&logoColor=ffffff" />
+  <img src="https://img.shields.io/badge/CHARTS-Recharts-22C55E?style=for-the-badge&logo=chartdotjs&logoColor=ffffff" />
+  <img src="https://img.shields.io/badge/MAPS-Leaflet-199900?style=for-the-badge&logo=leaflet&logoColor=ffffff" />
 </p>
 
+<br/>
+
 <p>
-  <img alt="Vercel" src="https://img.shields.io/badge/-Vercel-0d1117?style=flat-square&logo=vercel&logoColor=ffffff" />
-  <img alt="Render" src="https://img.shields.io/badge/-Render-0d1117?style=flat-square&logo=render&logoColor=46E3B7" />
-  <img alt="MongoDB Atlas" src="https://img.shields.io/badge/-MongoDB_Atlas-0d1117?style=flat-square&logo=mongodb&logoColor=47A248" />
+  <img src="https://img.shields.io/badge/FRONTEND-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=ffffff" />
+  <img src="https://img.shields.io/badge/BACKEND-Render-46E3B7?style=for-the-badge&logo=render&logoColor=000000" />
+  <img src="https://img.shields.io/badge/DATABASE-MongoDB_Atlas-47A248?style=for-the-badge&logo=mongodb&logoColor=ffffff" />
 </p>
+
+</div>
 
 </div>
 
