@@ -299,16 +299,6 @@ The existing PNG diagrams in `uml_diagrams/` are good as early design sketches, 
 | `erDiagram.png` | Conceptually useful, but mismatched with the current backend | It correctly identifies users, complaints, location, assignments, and role-based relations | The current app uses Clerk for users, not a local `USER` table with `passwordHash` and `refresh_token`; location and history are embedded inside the complaint document rather than separate Mongo collections |
 | `sequence_diagram.png` | Good workflow explanation, but not current-code accurate | It captures the complaint lifecycle: submit, assign, employee update, resolve, citizen track | It references old/local auth and email-style notifier behavior; current code uses Clerk auth, Express routes, services, repository, MongoDB, and Socket.IO status events |
 
-Final judgement: your UMLs are not "wrong" as conceptual system design, but they should not be submitted as exact implementation UMLs unless they are updated to match the code.
-
-| Diagram | Legacy PNG Status | Current Source Status |
-| --- | --- | --- |
-| Use Case Diagram | Mostly conceptually valid for citizen/admin/employee flows | Updated in `uml_diagrams/current/use_case_diagram.mmd` |
-| Class Diagram | Not fully aligned because it likely misses new service/repository/policy classes | Updated in `uml_diagrams/current/class_diagram.mmd` |
-| Sequence Diagram | May describe old route-to-model flow | Updated lifecycle sequence in `uml_diagrams/current/sequence_complaint_lifecycle.mmd` |
-| ER Diagram | Mostly valid because the complaint schema is still similar | Updated in `uml_diagrams/current/er_diagram.mmd` |
-| Component/System Diagram | Not present as current PNG | Added in `uml_diagrams/current/component_diagram.mmd` |
-
 ## Final Note
 
 The codebase now uses a layered architecture:
