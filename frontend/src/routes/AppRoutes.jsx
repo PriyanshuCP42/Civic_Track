@@ -6,6 +6,7 @@ import { useAuth } from "../context/useAuth";
 import { ROLES } from "../data/roleConstants";
 import RoleRoute from "./RoleRoute";
 
+
 const LoginPage = lazy(() => import("../pages/auth/LoginPage"));
 const RegisterPage = lazy(() => import("../pages/auth/RegisterPage"));
 const CitizenDashboard = lazy(() => import("../pages/citizen/CitizenDashboard"));
