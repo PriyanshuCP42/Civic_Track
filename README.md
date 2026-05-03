@@ -4,34 +4,34 @@
 
 <p><strong>Smart Civic Complaint Management · Built for Modern Municipalities</strong></p>
 
-<p>
-Citizens submit. Admins assign. Employees resolve — all in real time.
-</p>
+<p>Citizens submit. Admins assign. Employees resolve — all in real time.</p>
 
 <br/>
 
 <p>
-  <img alt="React" src="https://img.shields.io/badge/-React-61DAFB?style=flat-square&logo=react&logoColor=000" />
-  <img alt="Vite" src="https://img.shields.io/badge/-Vite-646CFF?style=flat-square&logo=vite&logoColor=fff" />
-  <img alt="Tailwind CSS" src="https://img.shields.io/badge/-Tailwind_CSS-06B6D4?style=flat-square&logo=tailwindcss&logoColor=fff" />
-  <img alt="Express" src="https://img.shields.io/badge/-Express-000000?style=flat-square&logo=express&logoColor=fff" />
-  <img alt="MongoDB" src="https://img.shields.io/badge/-MongoDB-00ED64?style=flat-square&logo=mongodb&logoColor=001E2B" />
-  <img alt="Node.js" src="https://img.shields.io/badge/-Node.js-339933?style=flat-square&logo=nodedotjs&logoColor=fff" />
-  <img alt="Socket.IO" src="https://img.shields.io/badge/-Socket.IO-010101?style=flat-square&logo=socketdotio&logoColor=fff" />
-  <img alt="Clerk" src="https://img.shields.io/badge/-Clerk-6C47FF?style=flat-square&logo=clerk&logoColor=fff" />
-  <img alt="Recharts" src="https://img.shields.io/badge/-Recharts-FF6B6B?style=flat-square&logo=chartdotjs&logoColor=fff" />
-  <img alt="Leaflet" src="https://img.shields.io/badge/-Leaflet-199900?style=flat-square&logo=leaflet&logoColor=fff" />
+  <img alt="React" src="https://img.shields.io/badge/-React-0d1117?style=flat-square&logo=react&logoColor=61DAFB" />
+  <img alt="Vite" src="https://img.shields.io/badge/-Vite-0d1117?style=flat-square&logo=vite&logoColor=646CFF" />
+  <img alt="Tailwind CSS" src="https://img.shields.io/badge/-Tailwind_CSS-0d1117?style=flat-square&logo=tailwindcss&logoColor=06B6D4" />
+  <img alt="Express" src="https://img.shields.io/badge/-Express-0d1117?style=flat-square&logo=express&logoColor=ffffff" />
+  <img alt="MongoDB" src="https://img.shields.io/badge/-MongoDB-0d1117?style=flat-square&logo=mongodb&logoColor=47A248" />
+  <img alt="Node.js" src="https://img.shields.io/badge/-Node.js-0d1117?style=flat-square&logo=nodedotjs&logoColor=68A063" />
+  <img alt="Socket.IO" src="https://img.shields.io/badge/-Socket.IO-0d1117?style=flat-square&logo=socketdotio&logoColor=ffffff" />
+  <img alt="Clerk" src="https://img.shields.io/badge/-Clerk-0d1117?style=flat-square&logo=clerk&logoColor=6C47FF" />
+  <img alt="React Router" src="https://img.shields.io/badge/-React_Router-0d1117?style=flat-square&logo=reactrouter&logoColor=CA4245" />
+  <img alt="Recharts" src="https://img.shields.io/badge/-Recharts-0d1117?style=flat-square&logo=chartdotjs&logoColor=22C55E" />
+  <img alt="Leaflet" src="https://img.shields.io/badge/-Leaflet-0d1117?style=flat-square&logo=leaflet&logoColor=199900" />
 </p>
 
 <p>
-  <a href="#"><img alt="Frontend on Vercel" src="https://img.shields.io/badge/Frontend-Vercel-000?style=flat-square&logo=vercel&logoColor=white" /></a>
-  <a href="#"><img alt="Backend on Render" src="https://img.shields.io/badge/Backend-Render-46E3B7?style=flat-square&logo=render&logoColor=000" /></a>
-  <a href="#"><img alt="Database on MongoDB Atlas" src="https://img.shields.io/badge/Database-MongoDB_Atlas-001E2B?style=flat-square&logo=mongodb&logoColor=00ED64" /></a>
+  <img alt="Vercel" src="https://img.shields.io/badge/-Vercel-0d1117?style=flat-square&logo=vercel&logoColor=ffffff" />
+  <img alt="Render" src="https://img.shields.io/badge/-Render-0d1117?style=flat-square&logo=render&logoColor=46E3B7" />
+  <img alt="MongoDB Atlas" src="https://img.shields.io/badge/-MongoDB_Atlas-0d1117?style=flat-square&logo=mongodb&logoColor=47A248" />
 </p>
 
 </div>
 
 ---
+
 
 ## What Is CivicTrack?
 
